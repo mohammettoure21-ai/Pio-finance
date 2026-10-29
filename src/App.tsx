@@ -23,6 +23,8 @@ import {
 import {
   blankCompany,
   initialPortfolio,
+  migratePortfolio,
+  attention,
   layout,
   participation,
   statuses,
@@ -184,16 +186,7 @@ function MoneyList({
     </section>
   );
 }
-const sections = [
-  "Identité",
-  "Participation",
-  "Finances",
-  "Valorisation",
-  "Actifs & dettes",
-  "Expansion",
-  "Tâches",
-  "Notes",
-];
+const sections = ["Société", "Chiffres", "Hermès"];
 function CompanyEditor({
   company,
   data,
@@ -210,7 +203,7 @@ function CompanyEditor({
   newTask: () => void;
 }) {
   const [c, setC] = useState(company);
-  const [tab, setTab] = useState("Identité");
+  const [tab, setTab] = useState("Société");
   const [error, setError] = useState("");
   const change = (key: keyof Company, value: unknown) =>
     setC((v) => ({ ...v, [key]: value }));
@@ -281,7 +274,7 @@ function CompanyEditor({
           ))}
         </div>
         <div className="editor-body">
-          {tab === "Identité" && (
+          {tab === "Société" && (
             <>
               <p className="hint">
                 Une fiche à votre image. Renseignez uniquement les informations
@@ -294,110 +287,17 @@ function CompanyEditor({
                 {input("currency", "Devise (ex. EUR, XOF)")}
                 {input("legalStatus", "Statut juridique / projet")}
               </div>
-              <h3>Suivi de l’entreprise</h3>
-              <Field label="Statut manuel">
-                <select
-                  value={c.status}
-                  onChange={(e) => {
-                    change("status", e.target.value);
-                    change("updated", today());
-                  }}
-                >
-                  {Object.entries(statuses).map(([k, v]) => (
-                    <option key={k} value={k}>
-                      {v}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Justification du statut">
-                <textarea
-                  value={c.justification}
-                  placeholder="Pourquoi ce statut ?"
-                  onChange={(e) => {
-                    change("justification", e.target.value);
-                    change("updated", today());
-                  }}
-                />
-              </Field>
-              {input("updated", "Dernière mise à jour", "date")}
-              <div className="notice">
-                Le statut reste manuel. Une baisse ponctuelle du chiffre
-                d’affaires ne change pas sa couleur.
-              </div>
-              <details>
-                <summary>Préparer mes règles de suivi</summary>
-                <p className="hint">
-                  Préférences enregistrées pour une future automatisation. Elles
-                  ne modifient pas encore le statut.
+              <div className={"notice " + attention(data, c.id).status}>
+                <strong>{attention(data, c.id).label}</strong>
+                <p>{attention(data, c.id).reason}</p>
+                <p>
+                  Le chiffre d’affaires ne déclenche aucune alerte. La couleur
+                  dépend des tâches liées à cette entreprise.
                 </p>
-                {(
-                  [
-                    "milestones",
-                    "lateTasks",
-                    "freshness",
-                    "indicators",
-                  ] as const
-                ).map((key, i) => (
-                  <label className="check-line" key={key}>
-                    <input
-                      type="checkbox"
-                      checked={c.rules[key]}
-                      onChange={(e) =>
-                        change("rules", { ...c.rules, [key]: e.target.checked })
-                      }
-                    />
-                    {
-                      [
-                        "Respect des jalons",
-                        "Tâches en retard",
-                        "Actualité des données financières",
-                        "Évolution par rapport aux objectifs",
-                      ][i]
-                    }
-                  </label>
-                ))}
-                <Field label="Ancienneté maximale des données (jours)">
-                  <input
-                    type="number"
-                    min="1"
-                    value={c.rules.freshnessDays}
-                    onChange={(e) =>
-                      change("rules", {
-                        ...c.rules,
-                        freshnessDays: e.target.value,
-                      })
-                    }
-                  />
-                </Field>
-                <Field label="Objectif de chiffre d’affaires">
-                  <input
-                    type="number"
-                    value={c.rules.revenueGoal}
-                    onChange={(e) =>
-                      change("rules", {
-                        ...c.rules,
-                        revenueGoal: e.target.value,
-                      })
-                    }
-                  />
-                </Field>
-                <Field label="Objectif de résultat">
-                  <input
-                    type="number"
-                    value={c.rules.profitGoal}
-                    onChange={(e) =>
-                      change("rules", {
-                        ...c.rules,
-                        profitGoal: e.target.value,
-                      })
-                    }
-                  />
-                </Field>
-              </details>
+              </div>
             </>
           )}
-          {tab === "Participation" && (
+          {tab === "Société" && (
             <>
               <h3>01 / Détention actuelle</h3>
               <Field label="Entreprise détentrice actuelle">
@@ -465,7 +365,7 @@ function CompanyEditor({
               </Field>
             </>
           )}
-          {tab === "Finances" && (
+          {tab === "Chiffres" && (
             <>
               <p className="notice">
                 Les chiffres concernent la société. Le chiffre d’affaires n’est
@@ -490,7 +390,7 @@ function CompanyEditor({
               </p>
             </>
           )}
-          {tab === "Valorisation" && (
+          {tab === "Chiffres" && (
             <>
               <div className="form-grid">
                 {input(
@@ -529,7 +429,7 @@ function CompanyEditor({
               </p>
             </>
           )}
-          {tab === "Actifs & dettes" && (
+          {tab === "Chiffres" && (
             <>
               <p className="notice">
                 Un bien géré pour un client n’est pas un actif que vous
@@ -547,7 +447,7 @@ function CompanyEditor({
               />
             </>
           )}
-          {tab === "Expansion" && (
+          {tab === "Hermès" && (
             <>
               <Field label="Objectifs">
                 <textarea
@@ -569,11 +469,11 @@ function CompanyEditor({
               />
             </>
           )}
-          {tab === "Tâches" && (
+          {tab === "Hermès" && (
             <>
               <p className="hint">
-                Les tâches sont gérées dans l’échéancier. Enregistrez la fiche
-                avant de le quitter.
+                Hermès centralise les tâches et les notes de cette entreprise.
+                Les rappels WhatsApp ne sont pas encore connectés.
               </p>
               {data.tasks
                 .filter((t) => t.companyId === c.id)
@@ -597,11 +497,11 @@ function CompanyEditor({
                   }
                 }}
               >
-                <Plus size={16} /> Gérer les tâches
+                <Plus size={16} /> Ajouter une tâche avec Hermès
               </button>
             </>
           )}
-          {tab === "Notes" && (
+          {tab === "Hermès" && (
             <Field label="Notes privées">
               <textarea
                 className="large-text"
@@ -683,13 +583,13 @@ function TaskEditor({
           </select>
         </Field>
         <div className="form-grid">
-          <Field label="Priorité">
+          <Field label="Urgence">
             <select
               value={t.priority}
               onChange={(e) => setT({ ...t, priority: e.target.value })}
             >
-              <option>Normale</option>
-              <option>Haute</option>
+              <option value="Normale">Normale</option>
+              <option value="Haute">Haute — urgente</option>
               <option>Basse</option>
             </select>
           </Field>
@@ -726,7 +626,9 @@ export default function App() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       return {
-        data: raw ? validatePortfolio(JSON.parse(raw)) : initialPortfolio(),
+        data: raw
+          ? migratePortfolio(validatePortfolio(JSON.parse(raw)))
+          : initialPortfolio(),
         error: "",
       };
     } catch {
@@ -739,11 +641,16 @@ export default function App() {
   });
   const [data, setData] = useState<Portfolio>(loaded.data);
   const [storageError, setStorageError] = useState(loaded.error);
-  const [target, setTarget] = useState(false);
+  const [target, setTarget] = useState(true);
   const [page, setPage] = useState("map");
   const [selected, setSelected] = useState<string | null>(null);
   const [task, setTask] = useState<Task | null>(null);
   const [pio, setPio] = useState(false);
+  const [noteCompany, setNoteCompany] = useState(
+    loaded.data.companies[0]?.id ?? "",
+  );
+  const [noteText, setNoteText] = useState("");
+  const [notePreview, setNotePreview] = useState(false);
   const [help, setHelp] = useState(false);
   const [holding, setHolding] = useState(false);
   const [search, setSearch] = useState("");
@@ -756,6 +663,16 @@ export default function App() {
   const view = useRef<HTMLDivElement>(null);
   const file = useRef<HTMLInputElement>(null);
   const graph = layout(data, target);
+  useEffect(() => {
+    if (loaded.error) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded.data));
+    } catch {
+      setStorageError(
+        "Sauvegarde locale indisponible. Exportez vos données avant de quitter.",
+      );
+    }
+  }, [loaded]);
   const current = data.companies.find((c) => c.id === selected);
   const late = data.tasks.filter((t) => !t.done && t.due && t.due < today());
   const pending = data.tasks.filter((t) => !t.done);
@@ -775,7 +692,11 @@ export default function App() {
     const w = view.current?.clientWidth || 1000;
     const z = Math.max(
       w < 600 ? 0.7 : 0.4,
-      Math.min(1, (w - 60) / graph.width),
+      Math.min(
+        1,
+        (w - 60) / graph.width,
+        ((view.current?.clientHeight || 470) - 40) / graph.height,
+      ),
     );
     setZoom(z);
     setPan({ x: (w - graph.width * z) / 2, y: 25 });
@@ -815,7 +736,9 @@ export default function App() {
     try {
       if (f.size > 5_000_000)
         throw new Error("Fichier trop volumineux (5 Mo maximum).");
-      const next = validatePortfolio(JSON.parse(await f.text()));
+      const next = migratePortfolio(
+        validatePortfolio(JSON.parse(await f.text())),
+      );
       if (
         confirm(
           `Remplacer vos données locales par ${next.companies.length} entreprises et ${next.tasks.length} tâches ? Exportez d’abord votre sauvegarde si nécessaire.`,
@@ -864,7 +787,7 @@ export default function App() {
           </button>
           <button
             className={page === "tasks" ? "active" : ""}
-            aria-label="Échéances et tâches"
+            aria-label="Hermès — tâches et notes"
             onClick={() => setPage("tasks")}
           >
             <ListTodo size={21} />
@@ -920,12 +843,12 @@ export default function App() {
               <h1>
                 {page === "map"
                   ? "Une vision d’ensemble."
-                  : "Chaque action compte."}
+                  : "Hermès, votre suivi."}
               </h1>
               <p>
                 {page === "map"
                   ? "Vos entreprises, leurs liens, votre prochaine étape."
-                  : "Vos priorités et vos échéances, au même endroit."}
+                  : "Vos tâches et notes, réunies avec Hermès. WhatsApp non connecté."}
               </p>
             </div>
             <button
@@ -956,6 +879,31 @@ export default function App() {
           )}
           {page === "map" ? (
             <>
+              <div className="overview">
+                <div>
+                  <span>Entreprises</span>
+                  <strong>{data.companies.length}</strong>
+                </div>
+                <div>
+                  <span>Tâches à faire</span>
+                  <strong>{pending.length}</strong>
+                </div>
+                <div>
+                  <span>Urgentes</span>
+                  <strong>
+                    {pending.filter((t) => t.priority === "Haute").length}
+                  </strong>
+                </div>
+                <div>
+                  <span>En retard</span>
+                  <strong>{late.length}</strong>
+                </div>
+                <div>
+                  <span>Valeur consolidée</span>
+                  <strong className="unavailable">Calcul indisponible</strong>
+                  <small>Évite le double comptage mère / filiales</small>
+                </div>
+              </div>
               <div className="map-toolbar">
                 <div className="view-tabs" aria-label="Vue du portefeuille">
                   <button
@@ -1084,16 +1032,43 @@ export default function App() {
                               key={n.id}
                               d={`M${p.x},${p.y + 88} V${(p.y + n.y) / 2} H${n.x} V${n.y - 88}`}
                               fill="none"
-                              stroke="#34534d"
+                              stroke="#777"
                               strokeWidth="1.5"
                             />
                           );
                         })}
+                      {(data.relationships ?? []).map((r, i) => {
+                        const a = graph.nodes.find((n) => n.id === r.from),
+                          b = graph.nodes.find((n) => n.id === r.to);
+                        if (!a || !b) return null;
+                        return (
+                          <g key={i} className="business-link">
+                            <path
+                              d={`M${a.x},${a.y + 88} V${Math.max(a.y, b.y) + 115} H${b.x} V${b.y + 88}`}
+                              fill="none"
+                              stroke="#999"
+                              strokeWidth="1"
+                            />
+                            <text
+                              x={(a.x + b.x) / 2}
+                              y={Math.max(a.y, b.y) + 132}
+                              textAnchor="middle"
+                              fill="#aaa"
+                              fontSize="10"
+                            >
+                              Lien métier FABI · pas un lien de détention
+                            </text>
+                          </g>
+                        );
+                      })}
                     </svg>
                     {graph.nodes.map((n) => (
                       <button
                         key={n.id}
-                        className={`entity ${n.company?.status || "root"} ${n.id === "holding" ? "holding" : ""}`}
+                        className={`entity ${n.company ? attention(data, n.id).status : "root"} ${n.id === "holding" ? "holding" : ""}`}
+                        title={
+                          n.company ? attention(data, n.id).reason : undefined
+                        }
                         style={{ left: n.x - 88, top: n.y - 88 }}
                         onClick={() =>
                           n.company
@@ -1133,7 +1108,7 @@ export default function App() {
                         <span className="entity-status">
                           <i />
                           {n.company
-                            ? statuses[n.company.status]
+                            ? attention(data, n.id).label
                             : n.id === "holding"
                               ? "En préparation"
                               : "Détention actuelle"}
@@ -1190,7 +1165,8 @@ export default function App() {
                   ))}
                 </div>
                 <span className="subtle">
-                  Suivi manuel · aucune donnée financière inventée
+                  Alertes : 1 tâche urgente = orange · 2 urgentes ou 3 en retard
+                  = rouge
                 </span>
               </div>
               <div className="next-step">
@@ -1211,7 +1187,7 @@ export default function App() {
                   className="text-button"
                   onClick={() => setPage("tasks")}
                 >
-                  Voir l’échéancier <ChevronRight size={17} />
+                  Voir avec Hermès <ChevronRight size={17} />
                 </button>
               </div>
             </>
@@ -1219,14 +1195,16 @@ export default function App() {
             <section className="tasks-card">
               <div className="section-title">
                 <h2>
-                  Échéancier{" "}
+                  Tâches d’Hermès{" "}
                   <span className="count">{pending.length} à faire</span>
                 </h2>
                 <span className="late-count">{late.length} en retard</span>
               </div>
               <p className="hint">
-                Les dates sont vérifiées à l’ouverture de la page. Aucun rappel
-                externe n’est envoyé.
+                Les couleurs se mettent à jour lorsque vous créez, terminez ou
+                modifiez une tâche. Urgence haute : 1 tâche = orange, au moins 2
+                = rouge. Au moins 3 tâches en retard = rouge. WhatsApp non
+                connecté.
               </p>
               {tasks.length === 0 ? (
                 <div className="empty-state">
@@ -1295,7 +1273,7 @@ export default function App() {
               {!milestones.length ? (
                 <p className="hint">
                   Aucun jalon daté en attente. Ajoutez-les dans la section
-                  Expansion d’une entreprise.
+                  Hermès d’une entreprise.
                 </p>
               ) : (
                 milestones
@@ -1326,13 +1304,13 @@ export default function App() {
             </span>
             <span>Données locales · Exportez régulièrement une sauvegarde</span>
             <span>
-              PIO × Finance <b>V1.0</b>
+              PIO × Finance <b>V2.0</b>
             </span>
           </footer>
         </main>
       </div>
       <button className="pio-launch" onClick={() => setPio(true)}>
-        <Sparkles size={18} /> PIO <span />
+        <Sparkles size={18} /> Hermès <span />
       </button>
       {current && (
         <CompanyEditor
@@ -1365,6 +1343,9 @@ export default function App() {
                       v.targetParentId === current.id ? "" : v.targetParentId,
                   })),
                 tasks: data.tasks.filter((t) => t.companyId !== current.id),
+                relationships: data.relationships?.filter(
+                  (r) => r.from !== current.id && r.to !== current.id,
+                ),
               });
               setSelected(null);
             }
@@ -1414,14 +1395,11 @@ export default function App() {
         </Modal>
       )}
       {pio && (
-        <Modal
-          title="Un peu de recul. Une direction claire."
-          close={() => setPio(false)}
-        >
+        <Modal title="Hermès — tâches et notes" close={() => setPio(false)}>
           <div className="pio-identity">
             <Sparkles size={28} />
             <span>
-              PIO <small>VOTRE FUTUR COPILOTE</small>
+              Hermès <small>VOTRE ASSISTANT</small>
             </span>
             <b>IA non connectée</b>
           </div>
@@ -1432,8 +1410,9 @@ export default function App() {
           <div className="notice">
             <strong>Avant toute modification</strong>
             <p>
-              Les propositions de PIO devront être récapitulées puis confirmées
-              par vous. Aucune action ne sera appliquée silencieusement.
+              Les propositions d’Hermès devront être récapitulées puis
+              confirmées par vous. Aucune action ne sera appliquée
+              silencieusement.
             </p>
           </div>
           <div className="integration-row">
@@ -1453,6 +1432,98 @@ export default function App() {
           >
             Consulter mes priorités <ArrowUpRight size={16} />
           </button>
+          <button
+            className="secondary"
+            onClick={() => {
+              setPio(false);
+              createTask();
+            }}
+          >
+            Nouvelle tâche avec Hermès
+          </button>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setNotePreview(true);
+            }}
+          >
+            <h3>Ajouter une note</h3>
+            <p className="hint">
+              Saisie directe dans Hermès, sans IA. La note est enregistrée dans
+              la fiche de l’entreprise après confirmation.
+            </p>
+            <Field label="Entreprise de la note">
+              <select
+                required
+                value={noteCompany}
+                onChange={(e) => {
+                  setNoteCompany(e.target.value);
+                  setNotePreview(false);
+                }}
+              >
+                <option value="">Choisir une entreprise</option>
+                {data.companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Note pour Hermès">
+              <textarea
+                required
+                value={noteText}
+                onChange={(e) => {
+                  setNoteText(e.target.value);
+                  setNotePreview(false);
+                }}
+                placeholder="Décision, idée ou information à conserver…"
+              />
+            </Field>
+            {!notePreview ? (
+              <button
+                className="primary"
+                disabled={
+                  !noteText.trim() ||
+                  !data.companies.some((c) => c.id === noteCompany)
+                }
+              >
+                Vérifier la note
+              </button>
+            ) : (
+              <div className="notice">
+                <strong>
+                  Ajouter à{" "}
+                  {data.companies.find((c) => c.id === noteCompany)?.name}
+                </strong>
+                <p style={{ whiteSpace: "pre-wrap" }}>{noteText}</p>
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() => {
+                    commit({
+                      ...data,
+                      companies: data.companies.map((c) =>
+                        c.id === noteCompany
+                          ? {
+                              ...c,
+                              notes: [c.notes, noteText.trim()]
+                                .filter(Boolean)
+                                .join("\n\n"),
+                            }
+                          : c,
+                      ),
+                    });
+                    setNoteText("");
+                    setNotePreview(false);
+                    setMessage("Note ajoutée par Hermès.");
+                  }}
+                >
+                  Confirmer l’ajout
+                </button>
+              </div>
+            )}
+          </form>
           <Field label="Conversation">
             <textarea
               disabled
@@ -1472,7 +1543,7 @@ export default function App() {
           <p>
             Ce prototype conserve vos données dans le stockage local de ce
             navigateur. Elles ne sont envoyées à aucun serveur. Le site public
-            ne contient que trois noms d’entreprises et des champs vides.
+            ne contient que quatre noms d’entreprises et des champs vides.
           </p>
           <p>
             Ce stockage n’est ni chiffré ni synchronisé. Sur un appareil

@@ -6,18 +6,24 @@ import {
   validatePortfolio,
   participation,
   layout,
+  migratePortfolio,
+  attention,
 } from "../src/finance/model.ts";
-test("initial portfolio has no invented owners, amounts or target links", () => {
+test("target pyramid has four companies without invented current ownership or amounts", () => {
   const d = initialPortfolio();
-  assert.equal(d.companies.length, 3);
+  assert.equal(d.companies.length, 4);
   assert.equal(validatePortfolio(d), d);
   assert.ok(
     d.companies.every(
-      (c) => !c.percent && !c.parentId && !c.targetParentId && !c.equity,
+      (c) =>
+        !c.percent &&
+        !c.parentId &&
+        c.targetParentId === "holding" &&
+        !c.equity,
     ),
   );
   assert.ok(layout(d, false).nodes.every((n) => !n.parent));
-  assert.equal(layout(d, true).nodes.filter((n) => n.parent).length, 0);
+  assert.equal(layout(d, true).nodes.filter((n) => n.parent).length, 4);
 });
 test("both ownership graphs reject circular links independently", () => {
   for (const key of ["parentId", "targetParentId"]) {
@@ -85,7 +91,7 @@ test("a multi-level tree keeps children below their actual parent, target separa
     assert.ok(n.y > g.nodes.find((p) => p.id === n.parent).y);
   }
   const target = layout(d, true);
-  assert.equal(target.nodes.find((n) => n.id === b.id).parent, "");
+  assert.equal(target.nodes.find((n) => n.id === b.id).parent, "holding");
   assert.equal(target.nodes.find((n) => n.id === a.id).parent, "holding");
 });
 test("JSON round trip restores tasks, assets and configured preferences", () => {
@@ -113,4 +119,64 @@ test("malformed and duplicate import records are rejected", () => {
   const d = initialPortfolio();
   d.companies[1].id = d.companies[0].id;
   assert.throws(() => validatePortfolio(d), /dupliqués/);
+});
+
+test("alerts depend on unfinished urgency and lateness, and clear on completion", () => {
+  const d = initialPortfolio(),
+    id = d.companies[0].id;
+  const add = (priority, due = "") =>
+    d.tasks.push({
+      id: crypto.randomUUID(),
+      title: "Action",
+      companyId: id,
+      priority,
+      assignee: "",
+      due,
+      done: false,
+    });
+  assert.equal(attention(d, id).status, "unknown");
+  add("Normale");
+  assert.equal(attention(d, id).status, "green");
+  add("Haute");
+  assert.equal(attention(d, id).status, "orange");
+  add("Haute");
+  assert.equal(attention(d, id).status, "red");
+  d.tasks.forEach((t) => (t.done = true));
+  assert.equal(attention(d, id).status, "green");
+  add("Basse", "2000-01-01");
+  assert.equal(attention(d, id).status, "orange");
+  add("Normale", "2000-01-01");
+  assert.equal(attention(d, id).status, "orange");
+  add("Normale", "2000-01-01");
+  assert.equal(attention(d, id).status, "red");
+  assert.equal(attention(d, d.companies[1].id).status, "unknown");
+});
+test("migration preserves user data and applies the requested target only once", () => {
+  const d = initialPortfolio();
+  delete d.uiRevision;
+  delete d.relationships;
+  d.companies = d.companies.slice(0, 3);
+  d.companies.forEach((c) => (c.targetParentId = ""));
+  d.holdingName = "Ma future holding";
+  d.companies[0].notes = "Private notes";
+  const oldId = d.companies[0].id;
+  const m = migratePortfolio(d);
+  validatePortfolio(m);
+  assert.equal(m.companies.length, 4);
+  assert.equal(m.holdingName, "FABI Holding");
+  assert.equal(m.companies[0].notes, "Private notes");
+  assert.equal(m.companies[0].id, oldId);
+  assert.equal(m.relationships.length, 1);
+  assert.ok(m.companies.every((c) => c.targetParentId === "holding"));
+  assert.ok(m.companies.every((c) => !c.parentId));
+  m.companies = m.companies.filter((c) => c.name !== "MBTG");
+  assert.equal(migratePortfolio(m).companies.length, 3);
+});
+test("holding is above its four target companies, and business link is not ownership", () => {
+  const d = initialPortfolio(),
+    g = layout(d, true),
+    h = g.nodes.find((n) => n.id === "holding");
+  assert.ok(g.nodes.filter((n) => n.company).every((n) => n.y > h.y));
+  assert.equal(d.relationships[0].kind, "operational");
+  assert.ok(d.companies.every((c) => !c.parentId));
 });

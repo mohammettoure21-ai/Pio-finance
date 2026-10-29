@@ -21,7 +21,10 @@ const out = (name) => path.join(output, name);
   page.on("dialog", (d) => d.accept());
   await page.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded" });
   await page.getByRole("heading", { name: "Une vision d’ensemble." }).waitFor();
-  assert.equal(await page.locator(".entity").count(), 3);
+  assert.equal(await page.locator(".entity").count(), 5);
+  await page
+    .getByRole("button", { name: "Portefeuille actuel", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Ajouter une entreprise", exact: true })
     .click();
@@ -29,9 +32,7 @@ const out = (name) => path.join(output, name);
     .getByLabel("Nom de l’entreprise", { exact: true })
     .fill("Atelier test");
   await page.getByLabel("Devise (ex. EUR, XOF)").fill("EUR");
-  await page.getByLabel("Statut manuel").selectOption("orange");
-  await page.getByLabel("Justification du statut").fill("Dossier à compléter");
-  await page.getByRole("tab", { name: "Participation", exact: true }).click();
+  await page.getByRole("tab", { name: "Société", exact: true }).click();
   let owner = page.getByLabel("Entreprise détentrice actuelle");
   await owner.selectOption({ label: "FABI Immobilier" });
   await page.getByLabel("Participation du détenteur (%)").fill("35");
@@ -39,10 +40,10 @@ const out = (name) => path.join(output, name);
   await page.getByLabel("Participation envisagée (%)").fill("40");
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await page.locator(".entity").filter({ hasText: "Atelier test" }).waitFor();
-  assert.equal(await page.locator(".graph>svg path").count(), 1);
+  assert.equal(await page.locator(".graph>svg > path").count(), 1);
   console.log("PASS add, edit, status, actual ownership");
   await page.locator(".entity").filter({ hasText: "FABI Immobilier" }).click();
-  await page.getByRole("tab", { name: "Participation", exact: true }).click();
+  await page.getByRole("tab", { name: "Société", exact: true }).click();
   await page
     .getByLabel("Entreprise détentrice actuelle")
     .selectOption({ label: "Atelier test" });
@@ -61,14 +62,14 @@ const out = (name) => path.join(output, name);
       "Structure cible — holding en préparation",
     ),
   );
-  assert.equal(await page.locator(".graph>svg path").count(), 1);
+  assert.equal(await page.locator(".graph>svg > path").count(), 5);
   assert.equal(await page.locator(".entity.holding").count(), 1);
   await page.locator(".entity.holding").click();
   await page.getByLabel("Nom envisagé").fill("Holding test");
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   console.log("PASS target view and holding configuration");
   await page
-    .getByRole("button", { name: "Échéances et tâches", exact: true })
+    .getByRole("button", { name: "Hermès — tâches et notes", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Nouvelle tâche", exact: true })
@@ -98,7 +99,7 @@ const out = (name) => path.join(output, name);
   console.log("PASS task creation, overdue, completion and editing");
   await page.reload({ waitUntil: "domcontentloaded" });
   await page
-    .getByRole("button", { name: "Échéances et tâches", exact: true })
+    .getByRole("button", { name: "Hermès — tâches et notes", exact: true })
     .click();
   await page.getByLabel("Terminer Statuts prêts", { exact: true }).waitFor();
   assert.equal(
@@ -117,15 +118,13 @@ const out = (name) => path.join(output, name);
   const exported = JSON.parse(
     require("fs").readFileSync(out("export.json"), "utf8"),
   );
-  assert.equal(exported.companies.length, 4);
+  assert.equal(exported.companies.length, 5);
   assert.equal(exported.tasks.length, 1);
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "invalid.json",
-      mimeType: "application/json",
-      buffer: Buffer.from('{"version":2}'),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "invalid.json",
+    mimeType: "application/json",
+    buffer: Buffer.from('{"version":2}'),
+  });
   await page.getByRole("status").filter({ hasText: "Import refusé" }).waitFor();
   await page.locator("input[type=file]").setInputFiles(out("export.json"));
   await page
@@ -147,10 +146,41 @@ const out = (name) => path.join(output, name);
   await page
     .getByRole("button", { name: "Supprimer l’entreprise", exact: true })
     .click();
-  assert.equal(await page.locator(".entity").count(), 3);
+  assert.equal(await page.locator(".entity").count(), 5);
   console.log("PASS confirmed task and company deletion");
-  await page.getByRole("button", { name: "PIO", exact: true }).click();
+  await page.getByRole("button", { name: "Hermès", exact: true }).click();
   await page.getByText("IA non connectée", { exact: true }).waitFor();
+  await page
+    .getByLabel("Entreprise de la note")
+    .selectOption({ label: "Afrodemy" });
+  await page.getByLabel("Note pour Hermès").fill("Note de test Hermès");
+  await page
+    .getByRole("button", { name: "Vérifier la note", exact: true })
+    .click();
+  assert.ok(
+    !(
+      await page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem("pio-finance-v1")).companies.find(
+            (c) => c.name === "Afrodemy",
+          ).notes,
+      )
+    ).includes("Note de test Hermès"),
+  );
+  await page
+    .getByRole("button", { name: "Confirmer l’ajout", exact: true })
+    .click();
+  assert.ok(
+    (
+      await page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem("pio-finance-v1")).companies.find(
+            (c) => c.name === "Afrodemy",
+          ).notes,
+      )
+    ).includes("Note de test Hermès"),
+  );
+  console.log("PASS Hermes note preview, confirmation and persistence");
   await page.getByRole("button", { name: "Fermer", exact: true }).click();
   await page.setViewportSize({ width: 375, height: 812 });
   await page
@@ -190,6 +220,67 @@ const out = (name) => path.join(output, name);
     .getByRole("button", { name: "Structure cible", exact: true })
     .click();
   await page.screenshot({ path: out("target.png"), fullPage: true });
+  await page
+    .getByRole("button", { name: "Hermès — tâches et notes", exact: true })
+    .click();
+  for (const title of ["Urgent MBTG 1", "Urgent MBTG 2"]) {
+    await page
+      .getByRole("button", { name: "Nouvelle tâche", exact: true })
+      .click();
+    await page.getByLabel("Titre", { exact: true }).fill(title);
+    await page.getByLabel("Entreprise liée").selectOption({ label: "MBTG" });
+    await page.getByLabel("Urgence").selectOption("Haute");
+    await page
+      .getByRole("button", { name: "Enregistrer la tâche", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Carte des participations", exact: true })
+      .click();
+    const node = page.locator(".entity").filter({ hasText: "MBTG" });
+    assert.ok(
+      (await node.getAttribute("class")).includes(
+        title.endsWith("1") ? "orange" : "red",
+      ),
+    );
+    await page
+      .getByRole("button", { name: "Hermès — tâches et notes", exact: true })
+      .click();
+  }
+  await page.getByLabel("Terminer Urgent MBTG 1", { exact: true }).check();
+  await page.getByLabel("Terminer Urgent MBTG 2", { exact: true }).check();
+  await page
+    .getByRole("button", { name: "Carte des participations", exact: true })
+    .click();
+  assert.ok(
+    (
+      await page
+        .locator(".entity")
+        .filter({ hasText: "MBTG" })
+        .getAttribute("class")
+    ).includes("green"),
+  );
+  await page.reload({ waitUntil: "domcontentloaded" });
+  assert.ok(
+    (
+      await page
+        .locator(".entity")
+        .filter({ hasText: "MBTG" })
+        .getAttribute("class")
+    ).includes("green"),
+  );
+  assert.equal(await page.locator(".business-link").count(), 1);
+  await page.locator(".entity").filter({ hasText: "Afrodemy" }).click();
+  assert.equal(await page.getByRole("tab").count(), 3);
+  await page.getByRole("tab", { name: "Hermès", exact: true }).click();
+  assert.ok(
+    (await page.getByLabel("Notes privées").inputValue()).includes(
+      "Note de test Hermès",
+    ),
+  );
+  await page.getByRole("button", { name: "Fermer", exact: true }).click();
+  console.log(
+    "PASS orange/red urgency alerts, clearing on completion, reload, three company tabs",
+  );
   assert.deepEqual(errors, []);
   console.log("PASS no browser exceptions");
   console.log("Test artifacts:", output);

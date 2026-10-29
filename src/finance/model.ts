@@ -1,7 +1,7 @@
 export const STORAGE_KEY = "pio-finance-v1";
 export const statuses = {
-  unknown: "À renseigner",
-  green: "Plan suivi",
+  unknown: "Aucune tâche",
+  green: "À jour",
   orange: "Attention",
   red: "Action requise",
 } as const;
@@ -64,6 +64,8 @@ export type Company = {
 };
 export type Portfolio = {
   version: 1;
+  uiRevision?: number;
+  relationships?: { from: string; to: string; kind: "operational" }[];
   holdingName: string;
   companies: Company[];
   tasks: Task[];
@@ -118,13 +120,87 @@ export function blankCompany(name = "Nouvelle entreprise"): Company {
   };
 }
 export function initialPortfolio(): Portfolio {
+  const companies = [
+    "FABI Immobilier",
+    "FABI Conciergerie",
+    "Afrodemy",
+    "MBTG",
+  ].map((name) => ({ ...blankCompany(name), targetParentId: "holding" }));
+  companies[3].activity = "Modern Business Tech Group";
   return {
     version: 1,
-    holdingName: "Ma future holding",
-    companies: ["FABI Immobilier", "FABI Conciergerie", "Afrodemy"].map(
-      blankCompany,
-    ),
+    uiRevision: 2,
+    holdingName: "FABI Holding",
+    companies,
     tasks: [],
+    relationships: [
+      { from: companies[0].id, to: companies[1].id, kind: "operational" },
+    ],
+  };
+}
+// Upgrade the original portfolio once, preserving IDs, tasks, notes and existing links.
+export function migratePortfolio(data: Portfolio): Portfolio {
+  if ((data.uiRevision ?? 1) >= 2) return data;
+  const companies = data.companies.map((c) => ({ ...c }));
+  if (!companies.some((c) => c.name.trim().toUpperCase() === "MBTG")) {
+    companies.push({
+      ...blankCompany("MBTG"),
+      activity: "Modern Business Tech Group",
+      targetParentId: "holding",
+    });
+  }
+  for (const c of companies)
+    if (
+      [
+        "fabi immobilier",
+        "fabi conciergerie",
+        "afrodemy",
+        "afrodémy",
+        "mbtg",
+      ].includes(c.name.trim().toLowerCase()) &&
+      !c.targetParentId
+    )
+      c.targetParentId = "holding";
+  const a = companies.find((c) => c.name.toLowerCase() === "fabi immobilier");
+  const b = companies.find((c) => c.name.toLowerCase() === "fabi conciergerie");
+  return {
+    ...data,
+    uiRevision: 2,
+    holdingName: ["Ma future holding", ""].includes(data.holdingName)
+      ? "FABI Holding"
+      : data.holdingName,
+    companies,
+    relationships:
+      data.relationships ??
+      (a && b ? [{ from: a.id, to: b.id, kind: "operational" }] : []),
+  };
+}
+export function attention(
+  data: Portfolio,
+  companyId: string,
+  date = today(),
+): { status: Status; label: string; reason: string } {
+  const tasks = data.tasks.filter((t) => t.companyId === companyId);
+  const pending = tasks.filter((t) => !t.done);
+  const urgent = pending.filter((t) => t.priority === "Haute").length;
+  const overdue = pending.filter((t) => t.due && t.due < date).length;
+  const status =
+    urgent >= 2 || overdue >= 3
+      ? "red"
+      : urgent || overdue
+        ? "orange"
+        : tasks.length
+          ? "green"
+          : "unknown";
+  return {
+    status,
+    label: {
+      red: "Action requise",
+      orange: "À surveiller",
+      green: "À jour",
+      unknown: "Aucune tâche",
+    }[status],
+    reason: `${pending.length} tâche(s) à faire · ${urgent} urgente(s) · ${overdue} en retard. Rouge : au moins 2 urgentes ou 3 en retard. Orange : au moins 1 urgente ou en retard.`,
   };
 }
 export function cycle(
@@ -246,6 +322,19 @@ export function validatePortfolio(raw: unknown): Portfolio {
     throw new Error(
       "Lien circulaire interdit : une entreprise ne peut pas détenir sa société mère.",
     );
+  if (
+    data.relationships !== undefined &&
+    (!Array.isArray(data.relationships) ||
+      data.relationships.some(
+        (r) =>
+          !r ||
+          r.kind !== "operational" ||
+          !ids.has(r.from) ||
+          !ids.has(r.to) ||
+          r.from === r.to,
+      ))
+  )
+    throw new Error("Lien métier invalide.");
   const tasks = new Set<string>();
   for (const t of data.tasks) {
     if (
@@ -307,7 +396,7 @@ export function layout(data: Portfolio, target: boolean) {
   if (target)
     all.unshift({
       id: "holding",
-      name: data.holdingName || "Ma future holding",
+      name: data.holdingName || "FABI Holding",
       parent: "",
     });
   const positions = new Map<string, { x: number; y: number }>();
@@ -319,7 +408,8 @@ export function layout(data: Portfolio, target: boolean) {
     positions.set(id, { x, y: 130 + depth * 270 });
     return x;
   }
-  for (const root of all.filter((n) => !n.parent)) place(root.id, 0);
+  for (const root of all.filter((n) => !n.parent))
+    place(root.id, target && root.id !== "holding" ? 1 : 0);
   return {
     nodes: all.map((n) => ({ ...n, ...positions.get(n.id)! })),
     width: Math.max(800, next * 250 + 30),

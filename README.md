@@ -19,14 +19,14 @@ Le build de production est généré dans `dist`. Ce projet utilise le dépôt i
 
 - **Portefeuille actuel** : les traits représentent uniquement les détenteurs explicitement renseignés. Les entreprises sans détenteur restent non reliées.
 - **Structure cible — holding en préparation** : une projection indépendante, sans transfert juridique présumé. Cliquez sur la holding pour modifier son nom. Renseignez les liens envisagés dans Participation.
-- Les fiches de FABI Immobilier, FABI Conciergerie et Afrodemy commencent sans montant ni pourcentage. Ajoutez entreprises, projets et filiales avec le bouton d’ajout.
-- Cliquez sur un cercle pour modifier identité, statut justifié et daté, participation, finances, valorisation, actifs, dettes, expansion et notes. **Enregistrer** applique les modifications à la carte et à la sauvegarde locale. Les liens circulaires sont refusés dans les deux vues.
+- Les fiches de FABI Immobilier, FABI Conciergerie, Afrodemy et MBTG commencent sans montant ni pourcentage. Ajoutez entreprises, projets et filiales avec le bouton d’ajout.
+- Cliquez sur un cercle : **Société** regroupe identité et participation ; **Chiffres** regroupe finances, valorisation, actifs et dettes ; **Hermès** réunit expansion, tâches et notes. **Enregistrer** applique les modifications à la carte et à la sauvegarde locale. Les liens circulaires sont refusés dans les deux vues.
 - Glissez le fond pour déplacer la carte, utilisez +/− pour zoomer et le bouton de recentrage pour revenir à la vue initiale. Sur téléphone, le zoom initial privilégie la lisibilité ; glissez pour accéder aux autres cercles ou utilisez la recherche.
-- L’échéancier permet de créer, modifier, terminer et supprimer les tâches liées à une entreprise. Il affiche les retards et les jalons d’expansion datés. Les suppressions demandent confirmation ; supprimer une entreprise retire ses tâches et ses liens, mais conserve ses filiales.
+- L’espace Hermès permet de créer, modifier, terminer et supprimer les tâches liées à une entreprise. Il affiche les retards et les jalons d’expansion datés. Les suppressions demandent confirmation ; supprimer une entreprise retire ses tâches et ses liens, mais conserve ses filiales.
 
 ## Données et confidentialité
 
-Les données sont stockées dans le navigateur sous `pio-finance-v1`, sans transmission à un serveur. Les anciennes clés Life System restent intactes. Le site public contient uniquement les trois noms initiaux, sans données financières personnelles.
+Les données sont stockées dans le navigateur sous `pio-finance-v1`, sans transmission à un serveur. Les anciennes clés Life System restent intactes. Le site public contient uniquement les quatre noms initiaux, sans données financières personnelles.
 
 Ce prototype n’a pas d’authentification, de chiffrement local, de synchronisation ni de sauvegarde distante. Utilisez un navigateur/profil personnel. Les boutons d’export et d’import JSON permettent de sauvegarder et restaurer les données. L’import valide le schéma, les références et les cycles, puis demande confirmation avant de remplacer la sauvegarde. Les exports peuvent contenir des informations privées : ne les ajoutez jamais au dépôt.
 
@@ -52,6 +52,22 @@ Créer un nouveau projet Vercel `pio-finance` relié à ce dépôt GitHub, branc
 
 ## Intégrations futures
 
-PIO affiche **IA non connectée**, sans réponses simulées. WhatsApp et les rappels automatiques ne sont pas connectés ; aucun envoi externe n’est effectué. Les préférences de règles de suivi sont enregistrées mais ne changent pas le statut manuel.
+Hermès affiche **IA non connectée**, sans réponses simulées. WhatsApp et les rappels automatiques ne sont pas connectés ; aucun envoi externe n’est effectué. Les alertes de suivi sont maintenant calculées à partir des tâches ; les anciens champs de statut manuel restent conservés dans les sauvegardes mais ne commandent plus les couleurs de la carte.
 
-`src/finance/integrations.ts` définit les contrats pour un futur service IA, de rappels et WhatsApp. Une connexion réelle exigera un backend authentifié, des secrets côté serveur et une validation des droits. Les propositions de modification IA devront être récapitulées puis confirmées avant toute application. La CSP actuelle limite les connexions au même domaine ; elle devra être adaptée uniquement aux services effectivement connectés.
+`src/finance/integrations.ts` définit les contrats pour un futur service IA, de rappels et WhatsApp. Une connexion réelle exigera un backend authentifié, des secrets côté serveur et une validation des droits. Les propositions de modification IA devront être récapitulées puis confirmées avant toute application. Les notes peuvent déjà être ajoutées manuellement depuis Hermès, avec aperçu et confirmation. La CSP actuelle limite les connexions au même domaine ; elle devra être adaptée uniquement aux services effectivement connectés.
+
+## Carte et suivi V2
+
+L’accueil ouvre la structure cible : **FABI Holding** en préparation, au-dessus des quatre entreprises, reliées par des intentions de détention. Cela ne change aucun détenteur actuel. Le lien métier entre FABI Immobilier et FABI Conciergerie est étiqueté séparément et ne représente aucune détention.
+
+La migration locale ajoute MBTG (Modern Business Tech Group) et les liens cibles de ces entreprises une seule fois. Elle préserve les identifiants, notes, tâches, chiffres et liens déjà renseignés ; les suppressions ou changements suivants ne sont pas annulés au rechargement.
+
+L’interface est noire et blanche, sauf les alertes de tâches :
+
+- Orange : au moins une tâche d’urgence **Haute** non terminée, ou une tâche en retard.
+- Rouge : au moins **deux** tâches d’urgence Haute non terminées, ou **trois** tâches en retard.
+- Neutre / à jour : aucune tâche urgente ou en retard. Sans tâche renseignée, le statut indique « Aucune tâche ».
+
+Une tâche en retard est une tâche non terminée dont l’échéance est antérieure à la date locale du jour. Terminer, supprimer ou modifier une tâche recalcule l’alerte. Une baisse du chiffre d’affaires ne change pas les couleurs. Les compteurs en haut montrent entreprises, tâches ouvertes, urgentes et retards ; aucune consolidation financière risquant de compter deux fois les filiales n’est affichée.
+
+L’ancien écran « Chaque action compte / Échéancier » devient l’espace de suivi Hermès. WhatsApp, les rappels automatiques et l’IA ne sont toujours pas connectés : aucune notification n’est envoyée. La saisie de notes dans Hermès fonctionne localement, sans simuler de conversation IA.
