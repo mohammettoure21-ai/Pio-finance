@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
   ArrowDownToLine,
@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import {
   blankCompany,
+  blankFinancialRecord,
+  financialRecords,
   initialPortfolio,
   migratePortfolio,
   attention,
@@ -33,7 +35,13 @@ import {
   uid,
   validatePortfolio,
 } from "./finance/model";
-import type { Company, Item, Portfolio, Task } from "./finance/model";
+import type {
+  Company,
+  FinancialRecord,
+  Item,
+  Portfolio,
+  Task,
+} from "./finance/model";
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -186,7 +194,16 @@ function MoneyList({
     </section>
   );
 }
-const sections = ["Société", "Chiffres", "Hermès"];
+const sections = [
+  "Identité",
+  "Participation",
+  "Finances",
+  "Valorisation",
+  "Actifs & dettes",
+  "Expansion",
+  "Tâches",
+  "Notes",
+];
 function CompanyEditor({
   company,
   data,
@@ -203,8 +220,20 @@ function CompanyEditor({
   newTask: () => void;
 }) {
   const [c, setC] = useState(company);
-  const [tab, setTab] = useState("Société");
+  const [tab, setTab] = useState("Identité");
   const [error, setError] = useState("");
+  const [recordId, setRecordId] = useState(
+    financialRecords(company)[0]?.id ?? "",
+  );
+  const records = financialRecords(c);
+  const record = records.find((r) => r.id === recordId) ?? records[0];
+  const updateRecord = (key: keyof FinancialRecord, value: string) =>
+    setC((v) => ({
+      ...v,
+      financialRecords: financialRecords(v).map((r) =>
+        r.id === record?.id ? { ...r, [key]: value, updatedAt: today() } : r,
+      ),
+    }));
   const change = (key: keyof Company, value: unknown) =>
     setC((v) => ({ ...v, [key]: value }));
   function input(key: keyof Company, label: string, type = "text") {
@@ -274,7 +303,7 @@ function CompanyEditor({
           ))}
         </div>
         <div className="editor-body">
-          {tab === "Société" && (
+          {tab === "Identité" && (
             <>
               <p className="hint">
                 Une fiche à votre image. Renseignez uniquement les informations
@@ -297,7 +326,7 @@ function CompanyEditor({
               </div>
             </>
           )}
-          {tab === "Société" && (
+          {tab === "Participation" && (
             <>
               <h3>01 / Détention actuelle</h3>
               <Field label="Entreprise détentrice actuelle">
@@ -365,33 +394,169 @@ function CompanyEditor({
               </Field>
             </>
           )}
-          {tab === "Chiffres" && (
+          {tab === "Finances" && (
             <>
-              <p className="notice">
-                Les chiffres concernent la société. Le chiffre d’affaires n’est
-                pas votre revenu personnel. Les montants sont dans la devise
-                renseignée : {c.currency || "à renseigner"}.
-              </p>
-              {input("period", "Période concernée (ex. exercice 2026)")}
-              <div className="form-grid">
-                {input("revenue", "Chiffre d’affaires", "number")}
-                {input("expenses", "Charges", "number")}
-                {input("profit", "Résultat", "number")}
-                {input("cash", "Trésorerie", "number")}
-                {input(
-                  "dividends",
-                  "Dividendes personnellement reçus",
-                  "number",
-                )}
-              </div>
+              <h3>Historique financier de l’entreprise</h3>
               <p className="hint">
-                Aucune consolidation automatique : les flux entre sociétés et
-                les périodes ne sont pas réconciliés.
+                Les chiffres évoluent. Conservez une période pour chaque
+                exercice, trimestre ou mois ; ajouter une période ne remplace
+                pas les précédentes.
+              </p>
+              <div className="period-toolbar">
+                <Field label="Période à consulter">
+                  <select
+                    value={record?.id ?? ""}
+                    onChange={(e) => setRecordId(e.target.value)}
+                  >
+                    {!records.length && (
+                      <option value="">Aucune période</option>
+                    )}
+                    {records.map((r, i) => (
+                      <option key={r.id} value={r.id}>
+                        {r.period || `Période ${i + 1} — à renseigner`}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => {
+                    const r = blankFinancialRecord(c.currency);
+                    change("financialRecords", [...records, r]);
+                    setRecordId(r.id);
+                  }}
+                >
+                  <Plus size={15} /> Ajouter une période
+                </button>
+              </div>
+              {record && (
+                <>
+                  <div className="form-grid">
+                    <Field label="Exercice / nom de la période">
+                      <input
+                        value={record.period}
+                        placeholder="Exercice 2025, T1 2026, octobre 2026…"
+                        onChange={(e) => updateRecord("period", e.target.value)}
+                      />
+                    </Field>
+                    <Field label="Devise de cette période">
+                      <input
+                        value={record.currency}
+                        placeholder="EUR, XOF…"
+                        onChange={(e) =>
+                          updateRecord("currency", e.target.value)
+                        }
+                      />
+                    </Field>
+                    <Field label="Début de période">
+                      <input
+                        type="date"
+                        value={record.startDate}
+                        onChange={(e) =>
+                          updateRecord("startDate", e.target.value)
+                        }
+                      />
+                    </Field>
+                    <Field label="Fin de période">
+                      <input
+                        type="date"
+                        value={record.endDate}
+                        onChange={(e) =>
+                          updateRecord("endDate", e.target.value)
+                        }
+                      />
+                    </Field>
+                  </div>
+                  <div className="financial-fields">
+                    {(
+                      [
+                        [
+                          "revenue",
+                          "Chiffre d’affaires",
+                          "Ventes et prestations réalisées par la société sur cette période. Ce montant n’est pas votre revenu personnel.",
+                        ],
+                        [
+                          "expenses",
+                          "Charges",
+                          "Dépenses et charges comptables de la période, selon le même périmètre que le chiffre d’affaires.",
+                        ],
+                        [
+                          "profit",
+                          "Résultat",
+                          "Bénéfice ou perte de la période. À renseigner d’après vos comptes ; aucun résultat n’est déduit automatiquement.",
+                        ],
+                        [
+                          "cash",
+                          "Trésorerie",
+                          "Solde de trésorerie à la fin de la période. Ce stock ne s’additionne pas à ceux des exercices précédents.",
+                        ],
+                        [
+                          "dividends",
+                          "Dividendes personnellement reçus",
+                          "Sommes effectivement reçues par vous pendant cette période, distinctes du chiffre d’affaires de l’entreprise.",
+                        ],
+                      ] as const
+                    ).map(([key, label, description]) => (
+                      <div className="metric-field" key={key}>
+                        <Field label={label}>
+                          <input
+                            type="number"
+                            step="any"
+                            value={record[key]}
+                            placeholder="À renseigner"
+                            onChange={(e) => updateRecord(key, e.target.value)}
+                          />
+                        </Field>
+                        <p className="hint">{description}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="hint">
+                    Dernière mise à jour : {record.updatedAt || "à renseigner"}.
+                    Montants en {record.currency || "devise à renseigner"}.
+                    Enregistrez la fiche pour conserver vos modifications.
+                  </p>
+                  <button
+                    type="button"
+                    className="text-button danger"
+                    onClick={() => {
+                      if (
+                        confirm(
+                          "Supprimer cette période financière ? Les autres périodes seront conservées.",
+                        )
+                      ) {
+                        const next = records.filter((r) => r.id !== record.id);
+                        change("financialRecords", next);
+                        setRecordId(next[0]?.id ?? "");
+                      }
+                    }}
+                  >
+                    <Trash2 size={14} /> Supprimer cette période
+                  </button>
+                </>
+              )}
+              <p className="notice">
+                Les périodes restent indépendantes. Aucun total ne mélange
+                plusieurs devises, exercices ou sociétés mères et filiales.
               </p>
             </>
           )}
-          {tab === "Chiffres" && (
+          {tab === "Valorisation" && (
             <>
+              <h3>Estimer la valeur de votre participation</h3>
+              <p className="hint">
+                La valeur des capitaux propres représente la valeur estimée
+                revenant aux associés. Elle est différente du chiffre d’affaires
+                et de la valeur brute des actifs.
+              </p>
+              <Field label="Devise de la valorisation">
+                <input
+                  value={c.currency}
+                  placeholder="EUR, XOF…"
+                  onChange={(e) => change("currency", e.target.value)}
+                />
+              </Field>
               <div className="form-grid">
                 {input(
                   "equity",
@@ -406,6 +571,12 @@ function CompanyEditor({
                   "number",
                 )}
               </div>
+              <p className="hint">
+                Méthode / source : précisez par exemple une évaluation
+                indépendante, une transaction comparable, un multiple de
+                résultat ou un actif net réévalué. Indiquez vos hypothèses et la
+                source dans les notes.
+              </p>
               <div className="valuation">
                 <span>Valeur indicative de ma participation</span>
                 <strong>
@@ -429,7 +600,7 @@ function CompanyEditor({
               </p>
             </>
           )}
-          {tab === "Chiffres" && (
+          {tab === "Actifs & dettes" && (
             <>
               <p className="notice">
                 Un bien géré pour un client n’est pas un actif que vous
@@ -447,7 +618,7 @@ function CompanyEditor({
               />
             </>
           )}
-          {tab === "Hermès" && (
+          {tab === "Expansion" && (
             <>
               <Field label="Objectifs">
                 <textarea
@@ -469,11 +640,11 @@ function CompanyEditor({
               />
             </>
           )}
-          {tab === "Hermès" && (
+          {tab === "Tâches" && (
             <>
               <p className="hint">
-                Hermès centralise les tâches et les notes de cette entreprise.
-                Les rappels WhatsApp ne sont pas encore connectés.
+                Les tâches ci-dessous sont liées à cette entreprise. Ajoutez une
+                action, son urgence, son responsable et son échéance.
               </p>
               {data.tasks
                 .filter((t) => t.companyId === c.id)
@@ -497,11 +668,11 @@ function CompanyEditor({
                   }
                 }}
               >
-                <Plus size={16} /> Ajouter une tâche avec Hermès
+                <Plus size={16} /> Ajouter une tâche
               </button>
             </>
           )}
-          {tab === "Hermès" && (
+          {tab === "Notes" && (
             <Field label="Notes privées">
               <textarea
                 className="large-text"
@@ -643,6 +814,8 @@ export default function App() {
   const [storageError, setStorageError] = useState(loaded.error);
   const [target, setTarget] = useState(true);
   const [page, setPage] = useState("map");
+  const [taskCompany, setTaskCompany] = useState("");
+  const [taskState, setTaskState] = useState("open");
   const [selected, setSelected] = useState<string | null>(null);
   const [task, setTask] = useState<Task | null>(null);
   const [pio, setPio] = useState(false);
@@ -753,11 +926,22 @@ export default function App() {
     }
     if (file.current) file.current.value = "";
   }
-  const tasks = [...data.tasks].sort(
-    (a, b) =>
-      Number(a.done) - Number(b.done) ||
-      (a.due || "9999").localeCompare(b.due || "9999"),
-  );
+  const tasks = data.tasks
+    .filter(
+      (t) =>
+        (!taskCompany || t.companyId === taskCompany) &&
+        (taskState === "all" || (taskState === "done" ? t.done : !t.done)),
+    )
+    .sort(
+      (a, b) =>
+        (
+          data.companies.find((c) => c.id === a.companyId)?.name ?? ""
+        ).localeCompare(
+          data.companies.find((c) => c.id === b.companyId)?.name ?? "",
+        ) ||
+        Number(a.done) - Number(b.done) ||
+        (a.due || "9999").localeCompare(b.due || "9999"),
+    );
   const milestones = data.companies.flatMap((c) =>
     c.milestones
       .filter((m) => m.amount && m.kind !== "Terminé")
@@ -787,7 +971,7 @@ export default function App() {
           </button>
           <button
             className={page === "tasks" ? "active" : ""}
-            aria-label="Hermès — tâches et notes"
+            aria-label="Tâches des entreprises"
             onClick={() => setPage("tasks")}
           >
             <ListTodo size={21} />
@@ -843,17 +1027,19 @@ export default function App() {
               <h1>
                 {page === "map"
                   ? "Une vision d’ensemble."
-                  : "Hermès, votre suivi."}
+                  : "Tâches des entreprises"}
               </h1>
               <p>
                 {page === "map"
                   ? "Vos entreprises, leurs liens, votre prochaine étape."
-                  : "Vos tâches et notes, réunies avec Hermès. WhatsApp non connecté."}
+                  : "Les actions à faire, entreprise par entreprise."}
               </p>
             </div>
             <button
               className="primary"
-              onClick={page === "map" ? addCompany : () => createTask()}
+              onClick={
+                page === "map" ? addCompany : () => createTask(taskCompany)
+              }
               disabled={page === "tasks" && !data.companies.length}
             >
               <Plus size={17} />
@@ -1041,22 +1227,27 @@ export default function App() {
                         const a = graph.nodes.find((n) => n.id === r.from),
                           b = graph.nodes.find((n) => n.id === r.to);
                         if (!a || !b) return null;
+                        const distance = Math.hypot(b.x - a.x, b.y - a.y);
+                        if (distance <= 190) return null;
+                        const dx = ((b.x - a.x) / distance) * 94,
+                          dy = ((b.y - a.y) / distance) * 94;
                         return (
                           <g key={i} className="business-link">
                             <path
-                              d={`M${a.x},${a.y + 88} V${Math.max(a.y, b.y) + 115} H${b.x} V${b.y + 88}`}
+                              d={`M${a.x + dx},${a.y + dy} L${b.x - dx},${b.y - dy}`}
                               fill="none"
                               stroke="#999"
-                              strokeWidth="1"
+                              strokeWidth="1.3"
+                              strokeDasharray="5 6"
                             />
                             <text
                               x={(a.x + b.x) / 2}
-                              y={Math.max(a.y, b.y) + 132}
+                              y={(a.y + b.y) / 2 + 18}
                               textAnchor="middle"
                               fill="#aaa"
-                              fontSize="10"
+                              fontSize="9"
                             >
-                              Lien métier FABI · pas un lien de détention
+                              Lien métier
                             </text>
                           </g>
                         );
@@ -1187,7 +1378,7 @@ export default function App() {
                   className="text-button"
                   onClick={() => setPage("tasks")}
                 >
-                  Voir avec Hermès <ChevronRight size={17} />
+                  Voir les tâches <ChevronRight size={17} />
                 </button>
               </div>
             </>
@@ -1195,85 +1386,139 @@ export default function App() {
             <section className="tasks-card">
               <div className="section-title">
                 <h2>
-                  Tâches d’Hermès{" "}
-                  <span className="count">{pending.length} à faire</span>
+                  Liste des tâches{" "}
+                  <span className="count">{tasks.length} affichée(s)</span>
                 </h2>
                 <span className="late-count">{late.length} en retard</span>
               </div>
               <p className="hint">
-                Les couleurs se mettent à jour lorsque vous créez, terminez ou
-                modifiez une tâche. Urgence haute : 1 tâche = orange, au moins 2
-                = rouge. Au moins 3 tâches en retard = rouge. WhatsApp non
-                connecté.
+                Cochez une tâche quand elle est terminée. Cliquez sur son titre
+                pour modifier les détails.
               </p>
+              <div className="task-filters">
+                <Field label="Entreprise à afficher">
+                  <select
+                    value={taskCompany}
+                    onChange={(e) => setTaskCompany(e.target.value)}
+                  >
+                    <option value="">Toutes les entreprises</option>
+                    {data.companies.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="État des tâches">
+                  <select
+                    value={taskState}
+                    onChange={(e) => setTaskState(e.target.value)}
+                  >
+                    <option value="open">À faire</option>
+                    <option value="done">Terminées</option>
+                    <option value="all">Toutes</option>
+                  </select>
+                </Field>
+              </div>
+              <details className="task-rules">
+                <summary>Comprendre les alertes de la carte</summary>
+                <p>
+                  Une tâche urgente ou en retard : orange. Deux tâches urgentes
+                  ou trois en retard : rouge. Une tâche terminée ne contribue
+                  plus à l’alerte.
+                </p>
+              </details>
               {tasks.length === 0 ? (
                 <div className="empty-state">
                   <ListTodo size={34} />
-                  <h3>De la vision à l’action.</h3>
-                  <p>Créez votre première tâche liée à une entreprise.</p>
+                  <h3>Aucune tâche dans cette sélection.</h3>
+                  <p>Ajoutez une tâche ou choisissez un autre filtre.</p>
                 </div>
               ) : (
-                tasks.map((t) => (
-                  <article
-                    className={`task-row ${t.done ? "completed" : ""}`}
-                    key={t.id}
-                  >
-                    <input
-                      type="checkbox"
-                      aria-label={"Terminer " + t.title}
-                      checked={t.done}
-                      onChange={() =>
-                        commit({
-                          ...data,
-                          tasks: data.tasks.map((v) =>
-                            v.id === t.id ? { ...v, done: !v.done } : v,
-                          ),
-                        })
-                      }
-                    />
-                    <button className="task-title" onClick={() => setTask(t)}>
-                      <strong>{t.title}</strong>
-                      <span>
-                        {data.companies.find((c) => c.id === t.companyId)?.name}{" "}
-                        · {t.assignee || "Responsable à renseigner"}
-                      </span>
-                    </button>
-                    <span className="priority">{t.priority}</span>
-                    <span
-                      className={
-                        !t.done && t.due && t.due < today() ? "overdue" : ""
-                      }
+                tasks.map((t, index) => (
+                  <Fragment key={t.id}>
+                    {(index === 0 ||
+                      tasks[index - 1].companyId !== t.companyId) && (
+                      <h3 className="task-company-heading">
+                        <Building2 size={16} />
+                        {data.companies.find((c) => c.id === t.companyId)?.name}
+                        <button
+                          className="text-button"
+                          onClick={() => createTask(t.companyId)}
+                          aria-label={
+                            "Ajouter une tâche pour " +
+                            data.companies.find((c) => c.id === t.companyId)
+                              ?.name
+                          }
+                        >
+                          <Plus size={14} /> Ajouter
+                        </button>
+                      </h3>
+                    )}
+                    <article
+                      className={`task-row ${t.done ? "completed" : ""}`}
+                      key={t.id}
                     >
-                      {t.due
-                        ? new Date(t.due + "T12:00:00").toLocaleDateString(
-                            "fr-FR",
-                          )
-                        : "Sans échéance"}
-                      {!t.done && t.due && t.due < today() && (
-                        <small>En retard</small>
-                      )}
-                    </span>
-                    <button
-                      className="icon danger"
-                      aria-label={"Supprimer la tâche " + t.title}
-                      onClick={() => {
-                        if (confirm("Supprimer cette tâche ?"))
+                      <input
+                        type="checkbox"
+                        aria-label={"Terminer " + t.title}
+                        checked={t.done}
+                        onChange={() =>
                           commit({
                             ...data,
-                            tasks: data.tasks.filter((v) => v.id !== t.id),
-                          });
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </article>
+                            tasks: data.tasks.map((v) =>
+                              v.id === t.id ? { ...v, done: !v.done } : v,
+                            ),
+                          })
+                        }
+                      />
+                      <button className="task-title" onClick={() => setTask(t)}>
+                        <strong>{t.title}</strong>
+                        <span>
+                          {
+                            data.companies.find((c) => c.id === t.companyId)
+                              ?.name
+                          }{" "}
+                          · {t.assignee || "Responsable à renseigner"}
+                        </span>
+                      </button>
+                      <span className="priority">{t.priority}</span>
+                      <span
+                        className={
+                          !t.done && t.due && t.due < today() ? "overdue" : ""
+                        }
+                      >
+                        {t.due
+                          ? new Date(t.due + "T12:00:00").toLocaleDateString(
+                              "fr-FR",
+                            )
+                          : "Sans échéance"}
+                        {!t.done && t.due && t.due < today() && (
+                          <small>En retard</small>
+                        )}
+                      </span>
+                      <button
+                        className="icon danger"
+                        aria-label={"Supprimer la tâche " + t.title}
+                        onClick={() => {
+                          if (confirm("Supprimer cette tâche ?"))
+                            commit({
+                              ...data,
+                              tasks: data.tasks.filter((v) => v.id !== t.id),
+                            });
+                        }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </article>
+                  </Fragment>
                 ))
               )}
               <h3 className="milestone-title">Jalons d’expansion</h3>
               {!milestones.length ? (
                 <p className="hint">
                   Aucun jalon daté en attente. Ajoutez-les dans la section
-                  Hermès d’une entreprise.
+                  Expansion d’une entreprise.
                 </p>
               ) : (
                 milestones
@@ -1347,6 +1592,7 @@ export default function App() {
                   (r) => r.from !== current.id && r.to !== current.id,
                 ),
               });
+              if (taskCompany === current.id) setTaskCompany("");
               setSelected(null);
             }
           }}
@@ -1369,6 +1615,8 @@ export default function App() {
                 ? data.tasks.map((v) => (v.id === t.id ? t : v))
                 : [...data.tasks, t],
             });
+            setTaskCompany(t.companyId);
+            setTaskState(t.done ? "done" : "open");
             setTask(null);
           }}
         />

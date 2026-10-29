@@ -1354,3 +1354,66 @@ h2 {
     font-size: 10px;
   }
 }
+
+.period-toolbar,
+.task-filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.period-toolbar .field,
+.task-filters .field {
+  flex: 1;
+  min-width: 170px;
+}
+.period-toolbar button {
+  margin-top: 16px;
+}
+.financial-fields .metric-field {
+  padding: 8px 0 14px;
+  border-bottom: 1px solid var(--border);
+}
+.metric-field .field {
+  margin-bottom: 7px;
+}
+.metric-field .hint {
+  margin-top: 0;
+}
+.task-company-heading {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  font-size: 15px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.task-company-heading button {
+  margin-left: auto;
+}
+.task-rules {
+  margin: 6px 0 23px;
+}
+.task-filters {
+  align-items: flex-start;
+}
+.task-filters .field {
+  max-width: 320px;
+}
+@media (max-width: 700px) {
+  .period-toolbar,
+  .task-filters {
+    gap: 0;
+  }
+  .period-toolbar .field,
+  .task-filters .field {
+    min-width: 100%;
+    max-width: 100%;
+  }
+  .period-toolbar button {
+    margin: 0 0 12px;
+  }
+  .task-company-heading {
+    font-size: 13px;
+  }
+}

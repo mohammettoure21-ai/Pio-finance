@@ -32,7 +32,7 @@ const out = (name) => path.join(output, name);
     .getByLabel("Nom de l’entreprise", { exact: true })
     .fill("Atelier test");
   await page.getByLabel("Devise (ex. EUR, XOF)").fill("EUR");
-  await page.getByRole("tab", { name: "Société", exact: true }).click();
+  await page.getByRole("tab", { name: "Participation", exact: true }).click();
   let owner = page.getByLabel("Entreprise détentrice actuelle");
   await owner.selectOption({ label: "FABI Immobilier" });
   await page.getByLabel("Participation du détenteur (%)").fill("35");
@@ -43,7 +43,7 @@ const out = (name) => path.join(output, name);
   assert.equal(await page.locator(".graph>svg > path").count(), 1);
   console.log("PASS add, edit, status, actual ownership");
   await page.locator(".entity").filter({ hasText: "FABI Immobilier" }).click();
-  await page.getByRole("tab", { name: "Société", exact: true }).click();
+  await page.getByRole("tab", { name: "Participation", exact: true }).click();
   await page
     .getByLabel("Entreprise détentrice actuelle")
     .selectOption({ label: "Atelier test" });
@@ -69,7 +69,7 @@ const out = (name) => path.join(output, name);
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   console.log("PASS target view and holding configuration");
   await page
-    .getByRole("button", { name: "Hermès — tâches et notes", exact: true })
+    .getByRole("button", { name: "Tâches des entreprises", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Nouvelle tâche", exact: true })
@@ -86,8 +86,10 @@ const out = (name) => path.join(output, name);
   assert.ok((await page.locator(".late-count").textContent()).includes("1"));
   await page
     .getByLabel("Terminer Préparer les statuts", { exact: true })
-    .check();
+    .click();
   assert.ok((await page.locator(".late-count").textContent()).includes("0"));
+  assert.equal(await page.locator(".task-row").count(), 0);
+  await page.getByLabel("État des tâches").selectOption("all");
   await page
     .locator(".task-title")
     .filter({ hasText: "Préparer les statuts" })
@@ -99,8 +101,9 @@ const out = (name) => path.join(output, name);
   console.log("PASS task creation, overdue, completion and editing");
   await page.reload({ waitUntil: "domcontentloaded" });
   await page
-    .getByRole("button", { name: "Hermès — tâches et notes", exact: true })
+    .getByRole("button", { name: "Tâches des entreprises", exact: true })
     .click();
+  await page.getByLabel("État des tâches").selectOption("all");
   await page.getByLabel("Terminer Statuts prêts", { exact: true }).waitFor();
   assert.equal(
     await page
@@ -221,7 +224,7 @@ const out = (name) => path.join(output, name);
     .click();
   await page.screenshot({ path: out("target.png"), fullPage: true });
   await page
-    .getByRole("button", { name: "Hermès — tâches et notes", exact: true })
+    .getByRole("button", { name: "Tâches des entreprises", exact: true })
     .click();
   for (const title of ["Urgent MBTG 1", "Urgent MBTG 2"]) {
     await page
@@ -243,11 +246,11 @@ const out = (name) => path.join(output, name);
       ),
     );
     await page
-      .getByRole("button", { name: "Hermès — tâches et notes", exact: true })
+      .getByRole("button", { name: "Tâches des entreprises", exact: true })
       .click();
   }
-  await page.getByLabel("Terminer Urgent MBTG 1", { exact: true }).check();
-  await page.getByLabel("Terminer Urgent MBTG 2", { exact: true }).check();
+  await page.getByLabel("Terminer Urgent MBTG 1", { exact: true }).click();
+  await page.getByLabel("Terminer Urgent MBTG 2", { exact: true }).click();
   await page
     .getByRole("button", { name: "Carte des participations", exact: true })
     .click();
@@ -270,8 +273,8 @@ const out = (name) => path.join(output, name);
   );
   assert.equal(await page.locator(".business-link").count(), 1);
   await page.locator(".entity").filter({ hasText: "Afrodemy" }).click();
-  assert.equal(await page.getByRole("tab").count(), 3);
-  await page.getByRole("tab", { name: "Hermès", exact: true }).click();
+  assert.equal(await page.getByRole("tab").count(), 8);
+  await page.getByRole("tab", { name: "Notes", exact: true }).click();
   assert.ok(
     (await page.getByLabel("Notes privées").inputValue()).includes(
       "Note de test Hermès",
@@ -279,7 +282,85 @@ const out = (name) => path.join(output, name);
   );
   await page.getByRole("button", { name: "Fermer", exact: true }).click();
   console.log(
-    "PASS orange/red urgency alerts, clearing on completion, reload, three company tabs",
+    "PASS orange/red urgency alerts, clearing on completion, reload, eight detailed company tabs",
+  );
+  assert.equal(
+    await page.locator(".business-link path").getAttribute("stroke-dasharray"),
+    "5 6",
+  );
+  await page.locator(".entity").filter({ hasText: "Afrodemy" }).click();
+  await page.getByRole("tab", { name: "Finances", exact: true }).click();
+  await page.getByLabel("Exercice / nom de la période").fill("Exercice 2025");
+  await page.getByLabel("Devise de cette période").fill("EUR");
+  await page.getByLabel("Début de période").fill("2025-01-01");
+  await page.getByLabel("Fin de période").fill("2025-12-31");
+  await page.getByLabel("Chiffre d’affaires", { exact: true }).fill("12000");
+  await page
+    .getByRole("button", { name: "Ajouter une période", exact: true })
+    .click();
+  await page.getByLabel("Exercice / nom de la période").fill("Exercice 2026");
+  await page.getByLabel("Devise de cette période").fill("EUR");
+  await page.getByLabel("Chiffre d’affaires", { exact: true }).fill("18000");
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.locator(".entity").filter({ hasText: "Afrodemy" }).click();
+  await page.getByRole("tab", { name: "Finances", exact: true }).click();
+  await page
+    .getByLabel("Période à consulter")
+    .selectOption({ label: "Exercice 2025" });
+  assert.equal(
+    await page.getByLabel("Chiffre d’affaires", { exact: true }).inputValue(),
+    "12000",
+  );
+  await page
+    .getByLabel("Période à consulter")
+    .selectOption({ label: "Exercice 2026" });
+  assert.equal(
+    await page.getByLabel("Chiffre d’affaires", { exact: true }).inputValue(),
+    "18000",
+  );
+  await page
+    .getByRole("button", { name: "Supprimer cette période", exact: true })
+    .click();
+  assert.equal(
+    await page.getByLabel("Chiffre d’affaires", { exact: true }).inputValue(),
+    "12000",
+  );
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  console.log(
+    "PASS independent financial years, reload, deletion preserving prior year and dashed business link",
+  );
+  await page
+    .getByRole("button", { name: "Tâches des entreprises", exact: true })
+    .click();
+  for (const [company, title] of [
+    ["Afrodemy", "Préparer le programme"],
+    ["FABI Immobilier", "Préparer le dossier immobilier"],
+  ]) {
+    await page
+      .getByRole("button", { name: "Nouvelle tâche", exact: true })
+      .click();
+    await page.getByLabel("Titre", { exact: true }).fill(title);
+    await page.getByLabel("Entreprise liée").selectOption({ label: company });
+    await page
+      .getByRole("button", { name: "Enregistrer la tâche", exact: true })
+      .click();
+  }
+  await page.getByLabel("Entreprise à afficher").selectOption("");
+  await page.getByLabel("État des tâches").selectOption("open");
+  assert.equal(await page.locator(".task-company-heading").count(), 2);
+  await page
+    .getByLabel("Entreprise à afficher")
+    .selectOption({ label: "Afrodemy" });
+  assert.equal(await page.locator(".task-row").count(), 1);
+  await page
+    .getByLabel("Terminer Préparer le programme", { exact: true })
+    .click();
+  assert.equal(await page.locator(".task-row").count(), 0);
+  await page.getByLabel("État des tâches").selectOption("done");
+  assert.equal(await page.locator(".task-row").count(), 1);
+  console.log(
+    "PASS tasks grouped by company, company filter, to-do and completed filters",
   );
   assert.deepEqual(errors, []);
   console.log("PASS no browser exceptions");

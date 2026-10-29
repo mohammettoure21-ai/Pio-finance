@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   blankCompany,
+  financialRecords,
+  blankFinancialRecord,
   initialPortfolio,
   validatePortfolio,
   participation,
@@ -179,4 +181,48 @@ test("holding is above its four target companies, and business link is not owner
   assert.ok(g.nodes.filter((n) => n.company).every((n) => n.y > h.y));
   assert.equal(d.relationships[0].kind, "operational");
   assert.ok(d.companies.every((c) => !c.parentId));
+});
+
+test("financial periods preserve legacy amounts and independent years", () => {
+  const d = initialPortfolio(),
+    c = d.companies[0];
+  Object.assign(c, {
+    period: "Exercice 2025",
+    revenue: "12000",
+    cash: "500",
+    currency: "EUR",
+  });
+  const legacy = financialRecords(c);
+  assert.equal(legacy[0].revenue, "12000");
+  assert.equal(legacy[0].period, "Exercice 2025");
+  assert.equal(c.financialRecords, undefined);
+  c.financialRecords = [
+    ...legacy,
+    {
+      ...blankFinancialRecord("EUR"),
+      period: "Exercice 2026",
+      revenue: "18000",
+    },
+  ];
+  validatePortfolio(d);
+  const restored = validatePortfolio(JSON.parse(JSON.stringify(d)));
+  assert.equal(financialRecords(restored.companies[0])[0].revenue, "12000");
+  assert.equal(financialRecords(restored.companies[0])[1].revenue, "18000");
+  c.financialRecords = [];
+  assert.deepEqual(financialRecords(c), []);
+});
+test("financial import rejects duplicate records, invalid amounts and inverted dates", () => {
+  const d = initialPortfolio(),
+    c = d.companies[0],
+    r = blankFinancialRecord("EUR");
+  c.financialRecords = [r, { ...r }];
+  assert.throws(() => validatePortfolio(d), /dupliquée/);
+  c.financialRecords = [{ ...r, revenue: "Infinity" }];
+  assert.throws(() => validatePortfolio(d), /Montant/);
+  c.financialRecords = [
+    { ...r, startDate: "2025-12-31", endDate: "2025-01-01" },
+  ];
+  assert.throws(() => validatePortfolio(d), /fin de période/);
+  c.financialRecords = [{ ...r, startDate: "2025-02-30" }];
+  assert.throws(() => validatePortfolio(d), /Date de période/);
 });

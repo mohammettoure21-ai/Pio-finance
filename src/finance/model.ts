@@ -16,6 +16,26 @@ export type Task = {
   due: string;
   done: boolean;
 };
+export type FinancialRecord = {
+  id: string;
+  period: string;
+  startDate: string;
+  endDate: string;
+  currency: string;
+  revenue: string;
+  expenses: string;
+  profit: string;
+  cash: string;
+  dividends: string;
+  updatedAt: string;
+};
+export const financeMetrics = [
+  "revenue",
+  "expenses",
+  "profit",
+  "cash",
+  "dividends",
+] as const;
 export type Company = {
   id: string;
   name: string;
@@ -23,6 +43,7 @@ export type Company = {
   country: string;
   currency: string;
   legalStatus: string;
+  financialRecords?: FinancialRecord[];
   parentId: string;
   owner: string;
   percent: string;
@@ -117,6 +138,41 @@ export function blankCompany(name = "Nouvelle entreprise"): Company {
       revenueGoal: "",
       profitGoal: "",
     },
+  };
+}
+// Legacy fields remain readable; dated periods are stored independently.
+export function financialRecords(company: Company): FinancialRecord[] {
+  return (
+    company.financialRecords ?? [
+      {
+        id: "legacy",
+        period: company.period,
+        startDate: "",
+        endDate: "",
+        currency: company.currency,
+        revenue: company.revenue,
+        expenses: company.expenses,
+        profit: company.profit,
+        cash: company.cash,
+        dividends: company.dividends,
+        updatedAt: "",
+      },
+    ]
+  );
+}
+export function blankFinancialRecord(currency = ""): FinancialRecord {
+  return {
+    id: uid(),
+    period: "",
+    startDate: "",
+    endDate: "",
+    currency,
+    revenue: "",
+    expenses: "",
+    profit: "",
+    cash: "",
+    dividends: "",
+    updatedAt: "",
   };
 }
 export function initialPortfolio(): Portfolio {
@@ -282,6 +338,45 @@ export function validatePortfolio(raw: unknown): Portfolio {
     ] as const)
       if (c[key] !== "" && !Number.isFinite(Number(c[key])))
         throw new Error("Montant invalide.");
+    if (c.financialRecords !== undefined) {
+      if (!Array.isArray(c.financialRecords) || c.financialRecords.length > 500)
+        throw new Error("Historique financier invalide.");
+      const recordIds = new Set<string>();
+      for (const record of c.financialRecords) {
+        if (
+          !record ||
+          Object.keys(blankFinancialRecord()).some(
+            (k) => typeof record[k as keyof FinancialRecord] !== "string",
+          ) ||
+          !record.id ||
+          recordIds.has(record.id)
+        )
+          throw new Error("Période financière invalide ou dupliquée.");
+        recordIds.add(record.id);
+        if (
+          financeMetrics.some(
+            (k) =>
+              record[k] !== "" &&
+              (!record[k].trim() || !Number.isFinite(Number(record[k]))),
+          )
+        )
+          throw new Error("Montant de période invalide.");
+        for (const key of ["startDate", "endDate", "updatedAt"] as const)
+          if (
+            record[key] &&
+            (!/^\d{4}-\d{2}-\d{2}$/.test(record[key]) ||
+              !Number.isFinite(Date.parse(record[key])) ||
+              new Date(record[key]).toISOString().slice(0, 10) !== record[key])
+          )
+            throw new Error("Date de période invalide.");
+        if (
+          record.startDate &&
+          record.endDate &&
+          record.startDate > record.endDate
+        )
+          throw new Error("La fin de période doit suivre son début.");
+      }
+    }
     for (const key of ["assets", "debts", "milestones"] as const)
       if (
         !Array.isArray(c[key]) ||

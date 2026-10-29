@@ -20,9 +20,9 @@ Le build de production est généré dans `dist`. Ce projet utilise le dépôt i
 - **Portefeuille actuel** : les traits représentent uniquement les détenteurs explicitement renseignés. Les entreprises sans détenteur restent non reliées.
 - **Structure cible — holding en préparation** : une projection indépendante, sans transfert juridique présumé. Cliquez sur la holding pour modifier son nom. Renseignez les liens envisagés dans Participation.
 - Les fiches de FABI Immobilier, FABI Conciergerie, Afrodemy et MBTG commencent sans montant ni pourcentage. Ajoutez entreprises, projets et filiales avec le bouton d’ajout.
-- Cliquez sur un cercle : **Société** regroupe identité et participation ; **Chiffres** regroupe finances, valorisation, actifs et dettes ; **Hermès** réunit expansion, tâches et notes. **Enregistrer** applique les modifications à la carte et à la sauvegarde locale. Les liens circulaires sont refusés dans les deux vues.
+- Cliquez sur un cercle : les onglets **Identité**, **Participation**, **Finances**, **Valorisation**, **Actifs & dettes**, **Expansion**, **Tâches** et **Notes** détaillent la fiche. **Enregistrer** applique les modifications à la carte et à la sauvegarde locale. Les liens circulaires sont refusés dans les deux vues.
 - Glissez le fond pour déplacer la carte, utilisez +/− pour zoomer et le bouton de recentrage pour revenir à la vue initiale. Sur téléphone, le zoom initial privilégie la lisibilité ; glissez pour accéder aux autres cercles ou utilisez la recherche.
-- L’espace Hermès permet de créer, modifier, terminer et supprimer les tâches liées à une entreprise. Il affiche les retards et les jalons d’expansion datés. Les suppressions demandent confirmation ; supprimer une entreprise retire ses tâches et ses liens, mais conserve ses filiales.
+- L’écran **Tâches des entreprises** permet de créer, modifier, terminer et supprimer les tâches liées à une entreprise. Il affiche les retards et les jalons d’expansion datés. Les suppressions demandent confirmation ; supprimer une entreprise retire ses tâches et ses liens, mais conserve ses filiales.
 
 ## Données et confidentialité
 
@@ -70,4 +70,14 @@ L’interface est noire et blanche, sauf les alertes de tâches :
 
 Une tâche en retard est une tâche non terminée dont l’échéance est antérieure à la date locale du jour. Terminer, supprimer ou modifier une tâche recalcule l’alerte. Une baisse du chiffre d’affaires ne change pas les couleurs. Les compteurs en haut montrent entreprises, tâches ouvertes, urgentes et retards ; aucune consolidation financière risquant de compter deux fois les filiales n’est affichée.
 
-L’ancien écran « Chaque action compte / Échéancier » devient l’espace de suivi Hermès. WhatsApp, les rappels automatiques et l’IA ne sont toujours pas connectés : aucune notification n’est envoyée. La saisie de notes dans Hermès fonctionne localement, sans simuler de conversation IA.
+L’ancien écran « Chaque action compte / Échéancier / Hermès, votre suivi » devient **Tâches des entreprises**. Les tâches sont regroupées par entreprise, filtrables par entreprise et par état, avec les tâches à faire affichées par défaut. WhatsApp, les rappels automatiques et l’IA ne sont toujours pas connectés : aucune notification n’est envoyée. La saisie de notes dans Hermès fonctionne localement, sans simuler de conversation IA.
+
+## Périodes financières et fiches détaillées
+
+L’onglet Finances conserve plusieurs périodes indépendantes par entreprise. Chaque période peut avoir un nom (exercice 2025, trimestre, mois…), des dates, une devise, un chiffre d’affaires, des charges, un résultat, une trésorerie et des dividendes reçus. Ajouter un exercice ne remplace pas les précédents. Le changement de période ne sauvegarde pas la fiche : le bouton **Enregistrer** confirme l’ensemble des modifications.
+
+Les anciens champs financiers restent intacts dans les sauvegardes ; ils alimentent la première période tant qu’aucun historique n’a été saisi. Ensuite, `financialRecords` contient les données détaillées. Une liste explicitement vidée ne fait pas réapparaître les anciens chiffres. Les exports/imports JSON conservent tout l’historique ; la suppression d’une période demande confirmation.
+
+Les fiches expliquent les différences entre revenus de la société, résultat, trésorerie et dividendes personnellement reçus. La valorisation reste séparée, datée et associée à une devise, une méthode et un pourcentage personnel effectif. Aucun cumul de périodes, devises ou sociétés n’est présenté comme une consolidation fiable.
+
+Le lien métier FABI utilise un court trait en tirets entre les cercles, sans flèche ; les liens de détention issus de FABI Holding restent continus. Les règles de couleurs restent disponibles sous « Comprendre les alertes de la carte » dans les tâches, sans occuper la liste principale. Hermès conserve son bouton séparé ; il ne donne plus son nom aux tâches des entreprises.
