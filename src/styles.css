@@ -1417,3 +1417,19 @@ h2 {
     font-size: 13px;
   }
 }
+
+/* Animate only the stroke pattern: node and tree positions remain fixed. */
+.ownership-link,
+.business-link path {
+  animation: connection-dashes 1.5s linear infinite;
+}
+@keyframes connection-dashes {
+  to { stroke-dashoffset: -22; }
+}
+.entity-icon:has(.finance-robot) { height: 72px; margin-top: -9px; }
+.finance-robot { width: 74px; height: 79px; display: block; }
+.entity:has(.finance-robot) .entity-percent { margin-top: 5px; }
+.entity:has(.finance-robot) .entity-status { margin-top: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  .ownership-link, .business-link path { animation: none; }
+}

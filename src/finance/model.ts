@@ -182,10 +182,11 @@ export function initialPortfolio(): Portfolio {
     "Afrodemy",
     "MBTG",
   ].map((name) => ({ ...blankCompany(name), targetParentId: "holding" }));
+  companies[1].targetParentId = companies[0].id;
   companies[3].activity = "Modern Business Tech Group";
   return {
     version: 1,
-    uiRevision: 2,
+    uiRevision: 3,
     holdingName: "FABI Holding",
     companies,
     tasks: [],
@@ -195,7 +196,7 @@ export function initialPortfolio(): Portfolio {
   };
 }
 // Upgrade the original portfolio once, preserving IDs, tasks, notes and existing links.
-export function migratePortfolio(data: Portfolio): Portfolio {
+function migrateOriginalPortfolio(data: Portfolio): Portfolio {
   if ((data.uiRevision ?? 1) >= 2) return data;
   const companies = data.companies.map((c) => ({ ...c }));
   if (!companies.some((c) => c.name.trim().toUpperCase() === "MBTG")) {
@@ -231,6 +232,20 @@ export function migratePortfolio(data: Portfolio): Portfolio {
       (a && b ? [{ from: a.id, to: b.id, kind: "operational" }] : []),
   };
 }
+// Apply the default target hierarchy once without overwriting custom ownership.
+export function migratePortfolio(data: Portfolio): Portfolio {
+  const migrated = migrateOriginalPortfolio(data);
+  if ((migrated.uiRevision ?? 1) >= 3) return migrated;
+  const companies = migrated.companies.map((c) => ({ ...c }));
+  const immobilier = companies.find((c) => c.name.trim().toLowerCase() === "fabi immobilier");
+  const concierge = companies.find((c) => c.name.trim().toLowerCase() === "fabi conciergerie");
+  if (immobilier && concierge && concierge.targetParentId === "holding") {
+    concierge.targetParentId = immobilier.id;
+    if (cycle(companies, "targetParentId")) concierge.targetParentId = "holding";
+  }
+  return { ...migrated, companies, uiRevision: 3 };
+}
+
 export function attention(
   data: Portfolio,
   companyId: string,

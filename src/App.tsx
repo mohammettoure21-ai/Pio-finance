@@ -1,3 +1,4 @@
+import FinanceRobot from "./components/FinanceRobot";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import {
@@ -1067,8 +1068,9 @@ export default function App() {
             <>
               <div className="overview">
                 <div>
-                  <span>Entreprises</span>
-                  <strong>{data.companies.length}</strong>
+                  <span>Pôles</span>
+                  <strong>{data.companies.filter((c) => c.targetParentId === "holding").length}</strong>
+                  <small>{data.companies.length} entreprises</small>
                 </div>
                 <div>
                   <span>Tâches à faire</span>
@@ -1216,6 +1218,8 @@ export default function App() {
                           return (
                             <path
                               key={n.id}
+                              className="ownership-link"
+                              strokeDasharray="5 6"
                               d={`M${p.x},${p.y + 88} V${(p.y + n.y) / 2} H${n.x} V${n.y - 88}`}
                               fill="none"
                               stroke="#777"
@@ -1274,13 +1278,9 @@ export default function App() {
                         }
                       >
                         <span className="entity-icon">
-                          {n.id === "holding" ? (
-                            <Layers3 size={22} />
-                          ) : n.company ? (
-                            <Building2 size={20} />
-                          ) : (
-                            <ShieldCheck size={21} />
-                          )}
+                          {n.id === "holding" || n.company ? (
+                            <FinanceRobot name={n.id === "holding" ? "FABI Holding" : n.name} />
+                          ) : <ShieldCheck size={21} />}
                         </span>
                         <strong>{n.name}</strong>
                         <span className="entity-percent">

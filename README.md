@@ -81,3 +81,9 @@ Les anciens champs financiers restent intacts dans les sauvegardes ; ils aliment
 Les fiches expliquent les différences entre revenus de la société, résultat, trésorerie et dividendes personnellement reçus. La valorisation reste séparée, datée et associée à une devise, une méthode et un pourcentage personnel effectif. Aucun cumul de périodes, devises ou sociétés n’est présenté comme une consolidation fiable.
 
 Le lien métier FABI utilise un court trait en tirets entre les cercles, sans flèche ; les liens de détention issus de FABI Holding restent continus. Les règles de couleurs restent disponibles sous « Comprendre les alertes de la carte » dans les tâches, sans occuper la liste principale. Hermès conserve son bouton séparé ; il ne donne plus son nom aux tâches des entreprises.
+
+## Structure cible à trois pôles
+
+FABI Holding regroupe trois pôles : FABI Immobilier, Afrodemy et MBTG. FABI Conciergerie apparaît sous Immobilier dans la projection cible, sans modifier les détentions actuelles. La migration V3 adapte une seule fois le lien cible par défaut de Conciergerie ; elle conserve les identifiants, données financières, notes, tâches et liens personnalisés, et évite les cycles. Les modifications ultérieures restent conservées.
+
+Les cinq robots sont noir (Holding), jaune (Immobilier), rose (Conciergerie), vert (Afrodemy) et blanc (MBTG). Seuls les tirets des connexions défilent ; la position de l’arbre reste fixe. La préférence système de réduction des animations est respectée.

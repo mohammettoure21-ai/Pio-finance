@@ -20,7 +20,7 @@ test("target pyramid has four companies without invented current ownership or am
       (c) =>
         !c.percent &&
         !c.parentId &&
-        c.targetParentId === "holding" &&
+        Boolean(c.targetParentId) &&
         !c.equity,
     ),
   );
@@ -93,7 +93,7 @@ test("a multi-level tree keeps children below their actual parent, target separa
     assert.ok(n.y > g.nodes.find((p) => p.id === n.parent).y);
   }
   const target = layout(d, true);
-  assert.equal(target.nodes.find((n) => n.id === b.id).parent, "holding");
+  assert.equal(target.nodes.find((n) => n.id === b.id).parent, a.id);
   assert.equal(target.nodes.find((n) => n.id === a.id).parent, "holding");
 });
 test("JSON round trip restores tasks, assets and configured preferences", () => {
@@ -169,7 +169,8 @@ test("migration preserves user data and applies the requested target only once",
   assert.equal(m.companies[0].notes, "Private notes");
   assert.equal(m.companies[0].id, oldId);
   assert.equal(m.relationships.length, 1);
-  assert.ok(m.companies.every((c) => c.targetParentId === "holding"));
+  assert.equal(m.companies.filter((c) => c.targetParentId === "holding").length, 3);
+  assert.equal(m.companies[1].targetParentId, m.companies[0].id);
   assert.ok(m.companies.every((c) => !c.parentId));
   m.companies = m.companies.filter((c) => c.name !== "MBTG");
   assert.equal(migratePortfolio(m).companies.length, 3);
@@ -225,4 +226,27 @@ test("financial import rejects duplicate records, invalid amounts and inverted d
   assert.throws(() => validatePortfolio(d), /fin de période/);
   c.financialRecords = [{ ...r, startDate: "2025-02-30" }];
   assert.throws(() => validatePortfolio(d), /Date de période/);
+});
+
+ test("v3 migration preserves financial data, IDs, tasks and custom target links", () => {
+  const old = initialPortfolio();
+  old.uiRevision = 2;
+  const [a, b, c] = old.companies;
+  b.targetParentId = "holding";
+  b.notes = "Private note";
+  b.financialRecords = [{ ...blankFinancialRecord("EUR"), revenue: "123" }];
+  const expected = structuredClone(old);
+  expected.uiRevision = 3;
+  expected.companies[1].targetParentId = a.id;
+  const migrated = migratePortfolio(old);
+  assert.deepEqual(migrated, expected);
+  assert.equal(old.companies[1].targetParentId, "holding");
+  assert.equal(validatePortfolio(migrated), migrated);
+  migrated.companies[1].targetParentId = "";
+  assert.equal(migratePortfolio(migrated).companies[1].targetParentId, "");
+  b.targetParentId = c.id;
+  assert.equal(migratePortfolio(old).companies[1].targetParentId, c.id);
+  b.targetParentId = "holding";
+  a.targetParentId = b.id;
+  assert.equal(validatePortfolio(migratePortfolio(old)).companies[1].targetParentId, "holding");
 });

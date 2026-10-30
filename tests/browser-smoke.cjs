@@ -22,6 +22,22 @@ const out = (name) => path.join(output, name);
   await page.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded" });
   await page.getByRole("heading", { name: "Une vision d’ensemble." }).waitFor();
   assert.equal(await page.locator(".entity").count(), 5);
+  assert.equal(await page.locator(".finance-robot").count(), 5);
+  assert.equal(await page.locator(".overview > div").first().locator("strong").textContent(), "3");
+  const immobilier = await page.locator(".entity").filter({ hasText: "FABI Immobilier" }).boundingBox();
+  const concierge = await page.locator(".entity").filter({ hasText: "FABI Conciergerie" }).boundingBox();
+  assert.ok(concierge.y > immobilier.y);
+  assert.equal(concierge.x, immobilier.x);
+  const graphStyle = await page.locator(".graph").getAttribute("style");
+  const dashBefore = await page.locator(".ownership-link").first().evaluate(el => getComputedStyle(el).strokeDashoffset);
+  await page.waitForTimeout(120);
+  assert.notEqual(await page.locator(".ownership-link").first().evaluate(el => getComputedStyle(el).strokeDashoffset), dashBefore);
+  assert.equal(await page.locator(".graph").getAttribute("style"), graphStyle);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  assert.equal(await page.locator(".ownership-link").first().evaluate(el => getComputedStyle(el).animationName), "none");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  console.log("PASS five robots, three poles, nested concierge, stationary tree and reduced motion");
+
   await page
     .getByRole("button", { name: "Portefeuille actuel", exact: true })
     .click();
