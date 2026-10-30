@@ -34,7 +34,7 @@ const output = fs.mkdtempSync(
     );
     assert.equal(
       await page.locator('.world-robot [data-mood="sleeping"]').count(),
-      4,
+      0,
     );
     const commandCanvas = page.locator(".world-robot.command canvas");
     const motionBefore = await commandCanvas.screenshot();
@@ -53,7 +53,15 @@ const output = fs.mkdtempSync(
     }
     assert.equal(await page.locator(".art-station .station-label").count(), 5);
 
-    assert.equal(await page.locator(".world-robot.sleeping").count(), 4);
+    assert.equal(await page.locator(".world-robot.sleeping").count(), 0);
+    assert.equal(await page.locator(".world-robot.ready").count(), 4);
+    assert.equal(
+      await page
+        .locator(".campus-route")
+        .first()
+        .evaluate((el) => getComputedStyle(el).strokeWidth),
+      "6px",
+    );
     await page.screenshot({
       path: path.join(output, "campus.png"),
       fullPage: true,

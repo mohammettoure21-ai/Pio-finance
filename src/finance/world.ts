@@ -202,20 +202,14 @@ export function robotState(data: Portfolio, id: string, now = new Date()) {
       late,
       reason: `${tasks.length} tâches à faire · ${late} en retard`,
     };
-  if (last && now.getTime() - last < 3 * 86400000)
-    return {
-      kind: "ready",
-      label: "À jour",
-      open: 0,
-      late: 0,
-      reason: "Activité récente, aucune tâche ouverte",
-    };
   return {
-    kind: "sleeping",
-    label: "En veille",
+    kind: "ready",
+    label: "Disponible",
     open: 0,
     late: 0,
-    reason: "Aucune tâche ouverte ni activité récente enregistrée",
+    reason: last
+      ? "Activité récente, aucune tâche ouverte"
+      : "Éveillé, prêt pour une nouvelle mission",
   };
 }
 export function makeWeeklyReport(
@@ -228,7 +222,9 @@ export function makeWeeklyReport(
     return day >= week && day <= end;
   });
   const weekStart = new Date(`${week}T00:00:00`).getTime();
-  const trackingStart = data.world ? Date.parse(data.world.startedAt) : now.getTime();
+  const trackingStart = data.world
+    ? Date.parse(data.world.startedAt)
+    : now.getTime();
   const oldestRetained =
     data.world?.events.length === 20000
       ? Date.parse(data.world.events[0].at)

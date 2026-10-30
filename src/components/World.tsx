@@ -564,17 +564,30 @@ export default function World({
                 const c = data.companies.find((c) => c.id === p.id)!;
                 const parent =
                   points.find((v) => v.id === c.targetParentId) ?? points[0];
+                const route = `M${p.x} ${p.y + 90} Q${(p.x + parent.x) / 2} ${Math.max(p.y, parent.y) + 130} ${parent.x} ${parent.y + 90}`;
                 return (
-                  <path
-                    key={p.id}
-                    d={`M${p.x} ${p.y + 90} Q${(p.x + parent.x) / 2} ${Math.max(p.y, parent.y) + 130} ${parent.x} ${parent.y + 90}`}
-                    stroke={p.color}
-                    strokeWidth="2"
-                    strokeDasharray="4 9"
-                    fill="none"
-                    opacity=".55"
-                    className="campus-route"
-                  />
+                  <g key={p.id} aria-hidden="true">
+                    <path
+                      className="campus-route-track"
+                      d={route}
+                      fill="none"
+                      stroke="#07111d"
+                      strokeWidth="10"
+                      strokeOpacity=".75"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d={route}
+                      stroke={p.color}
+                      strokeWidth="6"
+                      strokeDasharray="14 11"
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                      fill="none"
+                      className="campus-route"
+                      style={{ color: p.color }}
+                    />
+                  </g>
                 );
               })}
               {points.map((p) => {
@@ -822,11 +835,12 @@ export default function World({
             <aside className="world-rules">
               <span className="world-kicker">COMMENT LE MONDE RÉAGIT</span>
               <p>
-                💤 3 jours sans activité enregistrée, ou aucune mission ni
-                activité récente : en veille.
+                💤 Uniquement après 3 jours sans activité enregistrée : en
+                veille.
               </p>
               <p>
-                🔧 Des tâches ouvertes et une activité récente : au travail.
+                🔧 Sans mission : éveillé et disponible. Avec des tâches
+                ouvertes : au travail.
               </p>
               <p>💧 6 tâches ouvertes ou 3 retards : débordé.</p>
               <small>

@@ -94,9 +94,9 @@ L’accueil ouvre maintenant un campus tech interactif. Les bâtiments et robots
 
 Les robots réagissent aux données locales :
 
-- **En veille** : aucune mission ni activité récente, ou trois jours sans action enregistrée. Le robot se repose et des « Z » apparaissent.
+- **En veille** : uniquement après trois jours sans action enregistrée. Sans historique d’action, le délai part du début du suivi. Le robot se repose et des « Z » apparaissent.
 - **Au travail** : tâches ouvertes et activité récente (le début du suivi sert de repère pour les tâches préexistantes).
-- **À jour** : activité récente et aucune tâche ouverte.
+- **Disponible** : aucune tâche ouverte et moins de trois jours sans activité. Les robots commencent éveillés, même sans mission.
 - **Débordé** : au moins six tâches ouvertes ou trois retards. Le robot montre sa fatigue et des gouttes de sueur. Cet état prévaut sur la veille.
 
 Terminer une mission depuis le campus déclenche une livraison animée avec un rapport papier. Le bouton « Porter un rapport » permet aussi de l’envoyer manuellement. Le robot suit les détenteurs envisagés renseignés avant Holding ; Conciergerie passe donc par Immobilier dans la structure par défaut. La réception est enregistrée à l’arrivée, sans terminer d’autres tâches ni modifier les finances. Une seule livraison est montrée à la fois ; quitter le monde interrompt une livraison en cours. La réduction des animations est respectée, avec réception immédiate. Sur mobile, faites défiler le campus horizontalement pour découvrir les autres quartiers.
@@ -133,3 +133,5 @@ Les robots du campus sont des modèles 3D articulés : tête, bras, coudes, jamb
 Le moteur 3D est chargé à la demande. Le rendu est limité à 24 images par seconde, suspendu hors écran ou dans un onglet masqué, et reste statique lorsque la réduction des animations est demandée. Les géométries et contextes sont libérés à la fermeture ou au changement d’état. En l’absence de WebGL, un robot vectoriel assure un repli avec yeux fermés en veille. Aucune donnée métier n’est modifiée par les animations.
 
 La vue de départ du campus est compacte (960 px maximum sur grand écran), centrée dans son cadre. Les boutons de zoom permettent d’agrandir ou de réduire le monde ; sur mobile, sa largeur minimale est réduite à 600 px pour limiter le défilement.
+
+Les connexions du campus sont des tirets colorés de 6 px, avec un fond sombre pour rester visibles sur les bâtiments. Leur épaisseur reste constante pendant le zoom.

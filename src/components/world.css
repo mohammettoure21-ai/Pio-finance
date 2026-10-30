@@ -119,7 +119,7 @@
 }
 @keyframes world-dashes {
   to {
-    stroke-dashoffset: -26;
+    stroke-dashoffset: -50;
   }
 }
 .station-label {
@@ -543,8 +543,8 @@
   pointer-events: none;
 }
 .campus-route {
-  stroke-width: 2.3;
-  opacity: 0.65;
+  stroke-width: 6;
+  opacity: 0.95;
   filter: drop-shadow(0 0 4px currentColor);
   pointer-events: none;
 }
@@ -796,4 +796,8 @@
 .world-summary {
   padding-top: 10px;
   padding-bottom: 10px;
+}
+
+.campus-route-track {
+  pointer-events: none;
 }

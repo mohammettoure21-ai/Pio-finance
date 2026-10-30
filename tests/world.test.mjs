@@ -26,7 +26,15 @@ function task(data, id = "t", due = "") {
 test("robot states reflect actual load and inactivity; reports do not wake sleeping robots", () => {
   let d = tracked(),
     id = d.companies[0].id;
-  assert.equal(robotState(d, id, start).kind, "sleeping");
+  assert.equal(robotState(d, id, start).kind, "ready");
+  assert.equal(
+    robotState(d, id, new Date(start.getTime() + 3 * 86400000 - 1)).kind,
+    "ready",
+  );
+  assert.equal(
+    robotState(d, id, new Date(start.getTime() + 3 * 86400000)).kind,
+    "sleeping",
+  );
   const legacy = { ...d, tasks: [task(d)] };
   assert.equal(
     robotState(legacy, id, new Date(start.getTime() + 4 * 86400000)).kind,
