@@ -87,3 +87,33 @@ Le lien métier FABI utilise un court trait en tirets entre les cercles, sans fl
 FABI Holding regroupe trois pôles : FABI Immobilier, Afrodemy et MBTG. FABI Conciergerie apparaît sous Immobilier dans la projection cible, sans modifier les détentions actuelles. La migration V3 adapte une seule fois le lien cible par défaut de Conciergerie ; elle conserve les identifiants, données financières, notes, tâches et liens personnalisés, et évite les cycles. Les modifications ultérieures restent conservées.
 
 Les cinq robots sont noir (Holding), jaune (Immobilier), rose (Conciergerie), vert (Afrodemy) et blanc (MBTG). Seuls les tirets des connexions défilent ; la position de l’arbre reste fixe. La préférence système de réduction des animations est respectée.
+
+## Mon monde — campus interactif
+
+L’accueil ouvre maintenant un campus tech interactif. Les bâtiments et robots sont cliquables : sélectionnez un quartier pour ouvrir la fiche existante, donner une mission, consulter les tâches ou porter un rapport. La carte des participations reste accessible dans la navigation. Le campus est une représentation de travail, pas une déclaration de détention juridique.
+
+Les robots réagissent aux données locales :
+
+- **En veille** : aucune mission ni activité récente, ou trois jours sans action enregistrée. Les yeux se ferment et des « Z » apparaissent.
+- **Au travail** : tâches ouvertes et activité récente (le début du suivi sert de repère pour les tâches préexistantes).
+- **À jour** : activité récente et aucune tâche ouverte.
+- **Débordé** : au moins six tâches ouvertes ou trois retards. Le robot montre sa fatigue et des gouttes de sueur. Cet état prévaut sur la veille.
+
+Terminer une mission depuis le campus déclenche une livraison animée avec un rapport papier. Le bouton « Porter un rapport » permet aussi de l’envoyer manuellement. Le robot suit les détenteurs envisagés renseignés avant Holding ; Conciergerie passe donc par Immobilier dans la structure par défaut. La réception est enregistrée à l’arrivée, sans terminer d’autres tâches ni modifier les finances. Une seule livraison est montrée à la fois ; quitter le monde interrompt une livraison en cours. La réduction des animations est respectée, avec réception immédiate. Sur mobile, faites défiler le campus horizontalement pour découvrir les autres quartiers.
+
+Hermès est accessible au poste de pilotage : synthèse factuelle de la charge, états des robots, priorités, tâches et notes. Aucune IA externe n’est connectée.
+
+Un journal daté est ajouté aux sauvegardes existantes sans inventer les dates des anciennes actions. Il est exporté et importé avec les autres données ; les anciens fichiers restent compatibles. Les imports remplacent les données après confirmation et ne sont pas comptés comme des actions productives. Les suppressions, modifications de fiches et changements de tâches alimentent le journal.
+
+**Bilans hebdomadaires** : à partir du lundi, à l’ouverture du site (ou lors du contrôle chaque minute s’il est ouvert), Holding archive une seule fois la dernière semaine complète écoulée. Les périodes antérieures manquées ne sont pas reconstituées. Le bilan indique les tâches distinctes marquées terminées, les créations et les actions datées de la semaine ; la charge ouverte et les retards sont photographiés au moment de sa préparation, pas rétroactivement au dimanche. Un avertissement distingue les semaines partiellement suivies. Ces indicateurs mesurent le suivi des tâches, pas la rentabilité ; aucun total financier consolidé n’est inventé. Le journal conserve 20 000 événements et les 104 derniers bilans.
+
+Le fonctionnement reste local au navigateur : pas d’exécution lorsque le site est fermé, pas de notification ou d’envoi externe automatique. Pour un vrai envoi programmé ou une IA conversationnelle, il faudra un backend authentifié et des services configurés.
+
+```sh
+npm test # 14 tests portefeuille + 4 tests du monde
+npm run build
+npm run dev -- --port 5173 --strictPort
+# Dans un autre terminal :
+PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:e2e
+PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:world
+```

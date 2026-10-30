@@ -1,3 +1,5 @@
+import World from "./components/World";
+import { ensureWeeklyReport, recordChanges, robotState } from "./finance/world";
 import FinanceRobot from "./components/FinanceRobot";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -798,9 +800,11 @@ export default function App() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       return {
-        data: raw
-          ? migratePortfolio(validatePortfolio(JSON.parse(raw)))
-          : initialPortfolio(),
+        data: ensureWeeklyReport(
+          raw
+            ? migratePortfolio(validatePortfolio(JSON.parse(raw)))
+            : initialPortfolio(),
+        ),
         error: "",
       };
     } catch {
@@ -814,7 +818,8 @@ export default function App() {
   const [data, setData] = useState<Portfolio>(loaded.data);
   const [storageError, setStorageError] = useState(loaded.error);
   const [target, setTarget] = useState(true);
-  const [page, setPage] = useState("map");
+  const [page, setPage] = useState("world");
+  const [worldEpoch, setWorldEpoch] = useState(0);
   const [taskCompany, setTaskCompany] = useState("");
   const [taskState, setTaskState] = useState("open");
   const [selected, setSelected] = useState<string | null>(null);
@@ -850,7 +855,8 @@ export default function App() {
   const current = data.companies.find((c) => c.id === selected);
   const late = data.tasks.filter((t) => !t.done && t.due && t.due < today());
   const pending = data.tasks.filter((t) => !t.done);
-  function commit(next: Portfolio) {
+  function commit(next: Portfolio, track = true) {
+    next = track ? recordChanges(data, next) : ensureWeeklyReport(next);
     validatePortfolio(next);
     setData(next);
     try {
@@ -862,6 +868,13 @@ export default function App() {
       );
     }
   }
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const next = ensureWeeklyReport(data);
+      if (next !== data && !loaded.error) commit(next);
+    }, 60000);
+    return () => window.clearInterval(timer);
+  }, [data, loaded.error]);
   function center() {
     const w = view.current?.clientWidth || 1000;
     const z = Math.max(
@@ -918,7 +931,8 @@ export default function App() {
           `Remplacer vos données locales par ${next.companies.length} entreprises et ${next.tasks.length} tâches ? Exportez d’abord votre sauvegarde si nécessaire.`,
         )
       ) {
-        commit(next);
+        commit(next, false);
+        setWorldEpoch((epoch) => epoch + 1);
         setSelected(null);
         setMessage("Sauvegarde importée.");
       }
@@ -955,7 +969,7 @@ export default function App() {
           href="#"
           className="brand"
           aria-label="PIO Finance accueil"
-          onClick={() => setPage("map")}
+          onClick={() => setPage("world")}
         >
           p
           <span>
@@ -963,6 +977,13 @@ export default function App() {
           </span>
         </a>
         <div className="rail-nav">
+          <button
+            className={page === "world" ? "active" : ""}
+            aria-label="Mon monde"
+            onClick={() => setPage("world")}
+          >
+            <Building2 size={21} />
+          </button>
           <button
             className={page === "map" ? "active" : ""}
             aria-label="Carte des participations"
@@ -990,7 +1011,7 @@ export default function App() {
       </aside>
       <div className="workspace">
         <header className="topbar">
-          <a className="wordmark" href="#" onClick={() => setPage("map")}>
+          <a className="wordmark" href="#" onClick={() => setPage("world")}>
             PIO <span>×</span> Finance
             <small>VOTRE VISION. VOTRE PATRIMOINE.</small>
           </a>
@@ -1026,25 +1047,29 @@ export default function App() {
             <div>
               <span className="eyebrow">L’AMBITION PREND FORME</span>
               <h1>
-                {page === "map"
-                  ? "Une vision d’ensemble."
-                  : "Tâches des entreprises"}
+                {page === "world"
+                  ? "Bienvenue dans votre monde."
+                  : page === "map"
+                    ? "Une vision d’ensemble."
+                    : "Tâches des entreprises"}
               </h1>
               <p>
-                {page === "map"
-                  ? "Vos entreprises, leurs liens, votre prochaine étape."
-                  : "Les actions à faire, entreprise par entreprise."}
+                {page === "world"
+                  ? "Vos sociétés vivent au rythme de vos actions."
+                  : page === "map"
+                    ? "Vos entreprises, leurs liens, votre prochaine étape."
+                    : "Les actions à faire, entreprise par entreprise."}
               </p>
             </div>
             <button
               className="primary"
               onClick={
-                page === "map" ? addCompany : () => createTask(taskCompany)
+                page !== "tasks" ? addCompany : () => createTask(taskCompany)
               }
               disabled={page === "tasks" && !data.companies.length}
             >
               <Plus size={17} />
-              {page === "map" ? "Ajouter une entreprise" : "Nouvelle tâche"}
+              {page !== "tasks" ? "Ajouter une entreprise" : "Nouvelle tâche"}
             </button>
           </div>
           {storageError && (
@@ -1064,12 +1089,32 @@ export default function App() {
               </button>
             </div>
           )}
-          {page === "map" ? (
+          {page === "world" ? (
+            <World
+              key={worldEpoch}
+              data={data}
+              onUpdate={commit}
+              onEdit={setSelected}
+              onTask={createTask}
+              onTasks={(id) => {
+                setTaskCompany(id);
+                setTaskState("open");
+                setPage("tasks");
+              }}
+              onHermes={() => setPio(true)}
+            />
+          ) : page === "map" ? (
             <>
               <div className="overview">
                 <div>
                   <span>Pôles</span>
-                  <strong>{data.companies.filter((c) => c.targetParentId === "holding").length}</strong>
+                  <strong>
+                    {
+                      data.companies.filter(
+                        (c) => c.targetParentId === "holding",
+                      ).length
+                    }
+                  </strong>
                   <small>{data.companies.length} entreprises</small>
                 </div>
                 <div>
@@ -1279,8 +1324,14 @@ export default function App() {
                       >
                         <span className="entity-icon">
                           {n.id === "holding" || n.company ? (
-                            <FinanceRobot name={n.id === "holding" ? "FABI Holding" : n.name} />
-                          ) : <ShieldCheck size={21} />}
+                            <FinanceRobot
+                              name={
+                                n.id === "holding" ? "FABI Holding" : n.name
+                              }
+                            />
+                          ) : (
+                            <ShieldCheck size={21} />
+                          )}
                         </span>
                         <strong>{n.name}</strong>
                         <span className="entity-percent">
@@ -1651,10 +1702,51 @@ export default function App() {
             </span>
             <b>IA non connectée</b>
           </div>
-          <p>
-            Votre espace de conversation est prêt pour une future connexion à
-            une IA. Aucune réponse artificielle n’est simulée.
-          </p>
+          <div className="hermes-facts">
+            <h3>Le poste de pilotage de votre monde</h3>
+            <p>
+              Synthèse locale des données enregistrées. Hermès ne contacte aucun
+              service externe.
+            </p>
+            <p>
+              <strong>
+                {pending.length} tâches ouvertes · {late.length} en retard
+              </strong>
+            </p>
+            {data.companies.map((c) => {
+              const state = robotState(data, c.id);
+              return (
+                <p key={c.id}>
+                  <strong>{c.name}</strong> — {state.label} : {state.reason}.
+                </p>
+              );
+            })}
+            {late.length > 0 ? (
+              <p>
+                Priorité : reprendre les échéances dépassées, puis répartir la
+                charge des robots débordés.
+              </p>
+            ) : (
+              <p>
+                Aucun retard renseigné. Choisissez la prochaine mission pour
+                chaque société.
+              </p>
+            )}
+            <p>
+              {data.world?.reports.length
+                ? `${data.world.reports.length} bilan(s) hebdomadaire(s) disponible(s) dans Mon monde → Bilans de Holding.`
+                : "Le premier bilan sera préparé après la fin de la semaine de suivi."}
+            </p>
+            <button
+              className="secondary"
+              onClick={() => {
+                setPio(false);
+                setPage("world");
+              }}
+            >
+              Rejoindre le campus
+            </button>
+          </div>
           <div className="notice">
             <strong>Avant toute modification</strong>
             <p>

@@ -20,6 +20,7 @@ const out = (name) => path.join(output, name);
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("dialog", (d) => d.accept());
   await page.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Carte des participations", exact: true }).click();
   await page.getByRole("heading", { name: "Une vision d’ensemble." }).waitFor();
   assert.equal(await page.locator(".entity").count(), 5);
   assert.equal(await page.locator(".finance-robot").count(), 5);
@@ -116,6 +117,7 @@ const out = (name) => path.join(output, name);
     .click();
   console.log("PASS task creation, overdue, completion and editing");
   await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Carte des participations", exact: true }).click();
   await page
     .getByRole("button", { name: "Tâches des entreprises", exact: true })
     .click();
@@ -279,6 +281,7 @@ const out = (name) => path.join(output, name);
     ).includes("green"),
   );
   await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Carte des participations", exact: true }).click();
   assert.ok(
     (
       await page
@@ -319,6 +322,7 @@ const out = (name) => path.join(output, name);
   await page.getByLabel("Chiffre d’affaires", { exact: true }).fill("18000");
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Carte des participations", exact: true }).click();
   await page.locator(".entity").filter({ hasText: "Afrodemy" }).click();
   await page.getByRole("tab", { name: "Finances", exact: true }).click();
   await page

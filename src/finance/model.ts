@@ -1,3 +1,5 @@
+import { validateWorld } from "./world.ts";
+import type { WorldHistory } from "./world.ts";
 export const STORAGE_KEY = "pio-finance-v1";
 export const statuses = {
   unknown: "Aucune tâche",
@@ -84,6 +86,7 @@ export type Company = {
   };
 };
 export type Portfolio = {
+  world?: WorldHistory;
   version: 1;
   uiRevision?: number;
   relationships?: { from: string; to: string; kind: "operational" }[];
@@ -237,11 +240,16 @@ export function migratePortfolio(data: Portfolio): Portfolio {
   const migrated = migrateOriginalPortfolio(data);
   if ((migrated.uiRevision ?? 1) >= 3) return migrated;
   const companies = migrated.companies.map((c) => ({ ...c }));
-  const immobilier = companies.find((c) => c.name.trim().toLowerCase() === "fabi immobilier");
-  const concierge = companies.find((c) => c.name.trim().toLowerCase() === "fabi conciergerie");
+  const immobilier = companies.find(
+    (c) => c.name.trim().toLowerCase() === "fabi immobilier",
+  );
+  const concierge = companies.find(
+    (c) => c.name.trim().toLowerCase() === "fabi conciergerie",
+  );
   if (immobilier && concierge && concierge.targetParentId === "holding") {
     concierge.targetParentId = immobilier.id;
-    if (cycle(companies, "targetParentId")) concierge.targetParentId = "holding";
+    if (cycle(companies, "targetParentId"))
+      concierge.targetParentId = "holding";
   }
   return { ...migrated, companies, uiRevision: 3 };
 }
@@ -293,6 +301,7 @@ export function cycle(
 export function validatePortfolio(raw: unknown): Portfolio {
   if (!raw || typeof raw !== "object") throw new Error("Format JSON invalide.");
   const data = raw as Portfolio;
+  validateWorld(data.world);
   if (
     data.version !== 1 ||
     typeof data.holdingName !== "string" ||
