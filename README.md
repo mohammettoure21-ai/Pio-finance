@@ -120,8 +120,16 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:world
 
 ### Décor et suggestions d’Hermès
 
-Le campus utilise un décor 3D pré-rendu et des personnages indépendants issus de visuels générés, conservés dans `public/world`. Les enseignes sont du texte interactif superposé aux façades : modifier le nom d’une société actualise son enseigne. Les quatre quartiers principaux restent disponibles après renommage ; les sociétés supplémentaires utilisent des ateliers sous le campus. Les robots, leurs états, les livraisons, les fiches et les bilans restent pilotés par les données, indépendamment du décor.
+Le campus utilise un décor 3D pré-rendu conservé dans `public/world` et de petits personnages 3D articulés rendus avec Three.js. Les enseignes sont du texte interactif superposé aux façades : modifier le nom d’une société actualise son enseigne. Les quatre quartiers principaux restent disponibles après renommage ; les sociétés supplémentaires utilisent des ateliers sous le campus. Les robots, leurs états, les livraisons, les fiches et les bilans restent pilotés par les données, indépendamment du décor.
 
 Dans Hermès, renseignez la **Vision du groupe**, choisissez la **Société à accompagner** et complétez son activité, ses objectifs et ses jalons dans la fiche. Les suggestions locales utilisent ces éléments, la charge et les retards ; des pistes métier liées au nom de la société sont explicitement signalées comme à confirmer lorsque l’activité n’est pas renseignée. La vision enregistrée figure dans le contexte des propositions ; les priorités financières déclenchent une piste de suivi financier. Ce moteur est fondé sur des règles, sans analyse par une IA distante. Les titres déjà présents pour cette société sont exclus.
 
 **Examiner cette tâche** ouvre l’éditeur existant avec la société préremplie. Vous pouvez modifier ou annuler la proposition ; seule **Enregistrer la tâche** crée la mission. La vision est incluse dans les exports/imports, et les anciens fichiers restent compatibles. Une future IA devra utiliser les contrats d’intégration via un backend authentifié ; aucun secret n’est ajouté à l’application navigateur.
+
+### Personnages 3D vivants
+
+Les robots du campus sont des modèles 3D articulés : tête, bras, coudes, jambes et genoux s’animent indépendamment. Ils sont plus petits que les anciennes silhouettes en image. Au travail, les mains s’activent ; le général observe et donne des indications ; la marche articule les jambes lors des livraisons. En veille, le robot s’assoit, baisse la tête, ferme ses yeux et respire lentement. En surcharge, il s’essuie le front et une goutte de sueur descend.
+
+Le moteur 3D est chargé à la demande. Le rendu est limité à 24 images par seconde, suspendu hors écran ou dans un onglet masqué, et reste statique lorsque la réduction des animations est demandée. Les géométries et contextes sont libérés à la fermeture ou au changement d’état. En l’absence de WebGL, un robot vectoriel assure un repli avec yeux fermés en veille. Aucune donnée métier n’est modifiée par les animations.
+
+La vue de départ du campus est compacte (960 px maximum sur grand écran), centrée dans son cadre. Les boutons de zoom permettent d’agrandir ou de réduire le monde ; sur mobile, sa largeur minimale est réduite à 600 px pour limiter le défilement.

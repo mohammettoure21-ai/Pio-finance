@@ -1,3 +1,4 @@
+import type { RobotMood } from "./robot3d";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Portfolio } from "../finance/model";
@@ -518,7 +519,10 @@ export default function World({
             <svg
               className="campus"
               viewBox={`0 0 1200 ${height}`}
-              style={{ width: `${zoom * 100}%`, minWidth: `${zoom * 850}px` }}
+              style={{
+                width: `min(${zoom * 100}%, ${zoom * 960}px)`,
+                minWidth: `${zoom * 600}px`,
+              }}
               role="group"
               aria-label="Les quartiers de vos sociétés"
             >
@@ -577,7 +581,7 @@ export default function World({
                 const status =
                   p.id === "holding"
                     ? {
-                        kind: "command",
+                        kind: "command" as const,
                         label: "Commandement",
                         reason: "Bilan des sociétés et priorités",
                       }
@@ -643,7 +647,10 @@ export default function World({
                           title={status.reason}
                           onClick={() => setSelected(p.id)}
                         >
-                          <CampusRobot name={p.spriteName} />
+                          <CampusRobot
+                            name={p.spriteName}
+                            mood={status.kind as RobotMood}
+                          />
                           {status.kind === "sleeping" && (
                             <span className="sleep-sign">z Z</span>
                           )}
@@ -690,7 +697,10 @@ export default function World({
                   />
                   <foreignObject x="-33" y="-83" width="92" height="110">
                     <div className="courier-body">
-                      <CampusRobot name={delivery.route[0].spriteName} />
+                      <CampusRobot
+                        name={delivery.route[0].spriteName}
+                        mood="walking"
+                      />
                       <span className="paper-report">▤</span>
                     </div>
                   </foreignObject>

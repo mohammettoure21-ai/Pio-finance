@@ -9,7 +9,11 @@ const output = fs.mkdtempSync(
   const browser = await chromium.launch({
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined,
     headless: true,
-    args: ["--no-sandbox", "--disable-dev-shm-usage"],
+    args: [
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--enable-unsafe-swiftshader",
+    ],
   });
   try {
     const page = await browser.newPage({
@@ -22,7 +26,27 @@ const output = fs.mkdtempSync(
       .getByRole("heading", { name: "Un monde. Une vision." })
       .waitFor();
     assert.equal(await page.locator(".world-robot").count(), 5);
-    for (const asset of ["/world/campus.png", "/world/robots.png"]) {
+    assert.ok((await page.locator(".campus").boundingBox()).width <= 960);
+    await page.waitForFunction(
+      () =>
+        document.querySelectorAll('.world-robot [data-renderer="3d"]')
+          .length === 5,
+    );
+    assert.equal(
+      await page.locator('.world-robot [data-mood="sleeping"]').count(),
+      4,
+    );
+    const commandCanvas = page.locator(".world-robot.command canvas");
+    const motionBefore = await commandCanvas.screenshot();
+    await page.waitForTimeout(400);
+    assert.notDeepEqual(await commandCanvas.screenshot(), motionBefore);
+    const actorSize = await page
+      .locator(".world-robot .campus-robot-actor")
+      .first()
+      .boundingBox();
+    assert.ok(actorSize.width < 80 && actorSize.height < 100);
+
+    for (const asset of ["/world/campus.png"]) {
       const response = await page.request.get("http://127.0.0.1:5173" + asset);
       assert.equal(response.status(), 200);
       assert.ok((await response.body()).length > 10000);
@@ -226,6 +250,11 @@ const output = fs.mkdtempSync(
       1,
     );
     await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.waitForTimeout(150);
+    const reducedBefore = await commandCanvas.screenshot();
+    await page.waitForTimeout(250);
+    assert.deepEqual(await commandCanvas.screenshot(), reducedBefore);
+
     await page
       .getByRole("button", { name: "Ouvrir FABI Conciergerie", exact: true })
       .click();

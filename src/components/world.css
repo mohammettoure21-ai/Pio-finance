@@ -603,13 +603,6 @@
   color: #ffbf91;
   border-color: #cf986d;
 }
-.campus-robot-sprite {
-  flex-shrink: 0;
-  filter: drop-shadow(0 5px 3px #0006);
-}
-.world-robot.sleeping .campus-robot-sprite {
-  filter: saturate(0.8) brightness(0.9) drop-shadow(0 5px 3px #0006);
-}
 .world-robot .robot-desk {
   bottom: 23px;
   left: 29px;
@@ -702,4 +695,105 @@
 .hermes-proposals button {
   font-size: 11px;
   margin-bottom: 0;
+}
+
+/* Live articulated 3D actors: smaller, with movement inside the scene. */
+.world-robot {
+  align-items: flex-start;
+  justify-content: center;
+}
+.world-robot .campus-robot-actor {
+  display: block;
+  position: relative;
+  width: 62px;
+  height: 84px;
+  margin-top: 18px;
+  transform: none;
+  animation: none;
+  filter: none;
+}
+.campus-robot-actor canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.actor-hidden {
+  visibility: hidden;
+}
+.actor-fallback {
+  position: absolute;
+  inset: 0;
+}
+.world-robot .actor-fallback .finance-robot {
+  width: 100%;
+  height: 100%;
+  animation: none;
+  transform: none;
+}
+.world-robot.sleeping .actor-fallback .robot-eye {
+  transform: scaleY(0.1);
+  transform-origin: center;
+  transform-box: fill-box;
+}
+.fallback-closed-eyes {
+  position: absolute;
+  left: 24%;
+  top: 22%;
+  font-size: 11px;
+  color: #bde0ff;
+}
+.world-robot .robot-desk {
+  display: none;
+}
+.sleep-sign {
+  top: 16px;
+  right: 8px;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+.sweat-sign {
+  display: none;
+}
+.courier-body {
+  width: 80px;
+  height: 105px;
+}
+.courier-body .campus-robot-actor {
+  display: block;
+  position: relative;
+  width: 53px;
+  height: 74px;
+  margin: 10px auto 0;
+  animation: none;
+}
+.courier-body .actor-fallback .finance-robot {
+  width: 100%;
+  height: 100%;
+}
+.paper-report {
+  top: 46px;
+  right: 10px;
+  padding: 1px 3px;
+  font-size: 16px;
+}
+
+/* A compact default overview; zoom still lets the user move closer. */
+.campus {
+  margin-inline: auto;
+}
+.campus-scroll {
+  background: radial-gradient(ellipse at center, #273240, #141c26);
+}
+.world-header {
+  padding: 18px 26px 14px;
+}
+.world-header h2 {
+  font-size: clamp(22px, 2.5vw, 29px);
+}
+.world-tabs {
+  padding-bottom: 12px;
+}
+.world-summary {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }

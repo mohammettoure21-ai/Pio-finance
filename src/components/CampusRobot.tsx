@@ -1,24 +1,70 @@
-// Five independent actors cropped from the transparent 3D sprite sheet.
-export default function CampusRobot({ name }: { name: string }) {
+import { useEffect, useRef, useState } from "react";
+import type { RobotMood } from "./robot3d";
+import FinanceRobot from "./FinanceRobot";
+
+export default function CampusRobot({
+  name,
+  mood = "ready",
+}: {
+  name: string;
+  mood?: RobotMood;
+}) {
   const key = name.trim().toLowerCase();
-  const index =
+  const color =
     key === "fabi holding"
-      ? 0
+      ? "#323943"
       : key === "fabi immobilier"
-        ? 1
+        ? "#f3c328"
         : key === "fabi conciergerie"
-          ? 2
+          ? "#ed80b1"
           : ["afrodemy", "afrodémy"].includes(key)
-            ? 3
-            : 4;
+            ? "#26b887"
+            : "#e6ecf2";
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let active = true;
+    let cleanup: (() => void) | undefined;
+    setReady(false);
+    import("./robot3d")
+      .then(({ mountRobot }) => {
+        if (!active || !canvas.current) return;
+        try {
+          cleanup = mountRobot(canvas.current, color, mood);
+          setReady(true);
+        } catch {
+          setReady(false);
+        }
+      })
+      .catch(() => {
+        if (active) setReady(false);
+      });
+    return () => {
+      active = false;
+      cleanup?.();
+    };
+  }, [color, mood]);
   return (
-    <svg
-      className="finance-robot campus-robot-sprite"
-      viewBox={`${index * 434.4} 85 434.4 615`}
+    <span
+      className="finance-robot campus-robot-actor"
       role="img"
       aria-label={`Robot ${name}`}
+      data-renderer={ready ? "3d" : "fallback"}
+      data-mood={mood}
     >
-      <image href="/world/robots.png" width="2172" height="724" />
-    </svg>
+      <canvas
+        ref={canvas}
+        aria-hidden="true"
+        className={ready ? "" : "actor-hidden"}
+      />
+      {!ready && (
+        <span className={`actor-fallback ${mood}`} aria-hidden="true">
+          <FinanceRobot name={name} />
+          {mood === "sleeping" && (
+            <span className="fallback-closed-eyes">⌣ ⌣</span>
+          )}
+        </span>
+      )}
+    </span>
   );
 }
