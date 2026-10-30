@@ -51,6 +51,7 @@ export default function CampusRobot({
       aria-label={`Robot ${name}`}
       data-renderer={ready ? "3d" : "fallback"}
       data-mood={mood}
+      data-workstation={mood !== "walking"}
     >
       <canvas
         ref={canvas}

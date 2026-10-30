@@ -135,3 +135,5 @@ Le moteur 3D est chargé à la demande. Le rendu est limité à 24 images par se
 La vue de départ du campus est compacte (960 px maximum sur grand écran), centrée dans son cadre. Les boutons de zoom permettent d’agrandir ou de réduire le monde ; sur mobile, sa largeur minimale est réduite à 600 px pour limiter le défilement.
 
 Les connexions du campus sont des tirets colorés de 6 px, avec un fond sombre pour rester visibles sur les bâtiments. Leur épaisseur reste constante pendant le zoom.
+
+Les robots reprennent les proportions du design initial : casque arrondi, grands yeux blanc-violet lumineux, coques noires/jaunes/roses/vertes/blanches et articulations métalliques. Chacun dispose d’un bureau, d’un écran et d’un clavier en 3D. Les robots disponibles préparent leur travail à l’ordinateur, les robots avec missions tapent plus activement ; les livraisons restent des déplacements à pied sans bureau. La veille après trois jours et les données métier restent inchangées.

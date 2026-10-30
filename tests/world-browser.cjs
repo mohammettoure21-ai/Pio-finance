@@ -36,6 +36,10 @@ const output = fs.mkdtempSync(
       await page.locator('.world-robot [data-mood="sleeping"]').count(),
       0,
     );
+    assert.equal(
+      await page.locator('.world-robot [data-workstation="true"]').count(),
+      5,
+    );
     const commandCanvas = page.locator(".world-robot.command canvas");
     const motionBefore = await commandCanvas.screenshot();
     await page.waitForTimeout(400);
@@ -82,6 +86,10 @@ const output = fs.mkdtempSync(
       })
       .click();
     await page.locator(".report-courier").waitFor();
+    assert.equal(
+      await page.locator('.report-courier [data-workstation="false"]').count(),
+      1,
+    );
     const route = await page
       .locator(".report-courier animateMotion")
       .getAttribute("path");
