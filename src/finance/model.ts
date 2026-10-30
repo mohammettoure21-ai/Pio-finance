@@ -86,6 +86,7 @@ export type Company = {
   };
 };
 export type Portfolio = {
+  vision?: string;
   world?: WorldHistory;
   version: 1;
   uiRevision?: number;
@@ -302,6 +303,11 @@ export function validatePortfolio(raw: unknown): Portfolio {
   if (!raw || typeof raw !== "object") throw new Error("Format JSON invalide.");
   const data = raw as Portfolio;
   validateWorld(data.world);
+  if (
+    data.vision !== undefined &&
+    (typeof data.vision !== "string" || data.vision.length > 10000)
+  )
+    throw new Error("Vision du groupe invalide.");
   if (
     data.version !== 1 ||
     typeof data.holdingName !== "string" ||

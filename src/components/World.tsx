@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Portfolio } from "../finance/model";
 import { localDay, makeWeeklyReport, robotState } from "../finance/world";
-import FinanceRobot from "./FinanceRobot";
+import CampusRobot from "./CampusRobot";
 import "./world.css";
 
 type Props = {
@@ -20,49 +20,101 @@ type Place = {
   y: number;
   color: string;
   role: string;
+  spriteName: string;
+  art?: boolean;
+  sign?: { x: number; y: number; width: number; angle: number };
 };
 function places(data: Portfolio): Place[] {
-  const fixed: Record<string, [number, number, string, string]> = {
-    "fabi immobilier": [225, 230, "#f5c43f", "ARCHITECTURE & PATRIMOINE"],
-    "fabi conciergerie": [225, 600, "#f68bb5", "ACCUEIL & SERVICES"],
-    afrodemy: [945, 230, "#5bd6a3", "CAMPUS DES SAVOIRS"],
-    afrodémy: [945, 230, "#5bd6a3", "CAMPUS DES SAVOIRS"],
-    mbtg: [945, 600, "#e2e9f7", "LABORATOIRE TECH"],
-  };
+  const slots = [
+    {
+      names: ["fabi immobilier"],
+      x: 225,
+      y: 225,
+      sign: { x: 110, y: 135, width: 220, angle: -14 },
+      color: "#f5c43f",
+      role: "ARCHITECTURE & PATRIMOINE",
+      spriteName: "FABI Immobilier",
+    },
+    {
+      names: ["fabi conciergerie"],
+      x: 205,
+      y: 480,
+      sign: { x: 96, y: 402, width: 185, angle: -14 },
+      color: "#f68bb5",
+      role: "ACCUEIL & SERVICES",
+      spriteName: "FABI Conciergerie",
+    },
+    {
+      names: ["afrodemy", "afrodémy"],
+      x: 1000,
+      y: 225,
+      sign: { x: 938, y: 105, width: 235, angle: 13 },
+      color: "#5bd6a3",
+      role: "CAMPUS DES SAVOIRS",
+      spriteName: "Afrodemy",
+    },
+    {
+      names: ["mbtg"],
+      x: 1000,
+      y: 500,
+      sign: { x: 943, y: 410, width: 220, angle: 13 },
+      color: "#e2e9f7",
+      role: "LABORATOIRE TECH",
+      spriteName: "MBTG",
+    },
+  ];
+  // Keep the first four workplaces usable when an existing company is renamed.
+  const assignments = new Map<string, number>();
+  const used = new Set<number>();
+  for (const c of data.companies) {
+    const slot = slots.findIndex((s) =>
+      s.names.includes(c.name.trim().toLowerCase()),
+    );
+    if (slot >= 0 && !used.has(slot)) {
+      assignments.set(c.id, slot);
+      used.add(slot);
+    }
+  }
+  for (const c of data.companies)
+    if (!assignments.has(c.id)) {
+      const free = slots.findIndex((_, i) => !used.has(i));
+      if (free >= 0) {
+        assignments.set(c.id, free);
+        used.add(free);
+      }
+    }
   let extra = 0;
-  const occupied = new Set<string>();
   return [
     {
       id: "holding",
       name: data.holdingName,
-      x: 585,
-      y: 325,
-      color: "#8c9db7",
+      x: 610,
+      y: 205,
+      sign: { x: 492, y: 121, width: 255, angle: 0 },
+      color: "#d6c79b",
       role: "CENTRE DE COMMANDEMENT",
+      spriteName: "FABI Holding",
+      art: true,
     },
     ...data.companies.map((c) => {
-      let p = fixed[c.name.trim().toLowerCase()];
-      if (!p || occupied.has(`${p[0]},${p[1]}`)) {
-        const i = extra++;
-        p = [
-          225 + (i % 3) * 360,
-          850 + Math.floor(i / 3) * 310,
-          "#8da9e5",
-          "ATELIER INDÉPENDANT",
-        ];
-      }
-      occupied.add(`${p[0]},${p[1]}`);
+      const slot = assignments.get(c.id);
+      if (slot !== undefined)
+        return { id: c.id, name: c.name, ...slots[slot], art: true };
+      const i = extra++;
       return {
         id: c.id,
         name: c.name,
-        x: p[0],
-        y: p[1],
-        color: p[2],
-        role: p[3],
+        x: 225 + (i % 3) * 375,
+        y: 990 + Math.floor(i / 3) * 350,
+        color: "#8da9e5",
+        role: "ATELIER INDÉPENDANT",
+        spriteName: c.name,
+        art: false,
       };
     }),
   ];
 }
+
 function Building({ p, holding }: { p: Place; holding: boolean }) {
   return (
     <g
@@ -290,7 +342,10 @@ export default function World({
   latest.current = { data, onUpdate };
   const seenEvent = useRef(data.world?.events.at(-1)?.id);
   const points = places(data);
-  const height = Math.max(770, ...points.map((p) => p.y + 220));
+  const height = Math.max(
+    800,
+    ...points.filter((p) => !p.art).map((p) => p.y + 220),
+  );
   const selectedPlace = points.find((p) => p.id === selected) ?? points[0];
   const company = data.companies.find((c) => c.id === selectedPlace.id);
   const state = company ? robotState(data, company.id, now) : null;
@@ -365,15 +420,13 @@ export default function World({
               ...current.world,
               events: [
                 ...current.world.events,
-                ...delivery.route
-                  .slice(1)
-                  .map((p) => ({
-                    id: crypto.randomUUID(),
-                    at,
-                    companyId: delivery.id,
-                    kind: "report" as const,
-                    recipient: p.id,
-                  })),
+                ...delivery.route.slice(1).map((p) => ({
+                  id: crypto.randomUUID(),
+                  at,
+                  companyId: delivery.id,
+                  kind: "report" as const,
+                  recipient: p.id,
+                })),
               ].slice(-20000),
             },
           });
@@ -483,42 +536,26 @@ export default function World({
                     strokeWidth=".6"
                   />
                 </pattern>
-                <linearGradient id="campus-ground" x2="0" y2="1">
-                  <stop stopColor="#1c293c" />
-                  <stop offset="1" stopColor="#0c1422" />
-                </linearGradient>
               </defs>
-              <rect
+              <rect width="1200" height={height} fill="#17202c" />
+              {height > 800 && (
+                <rect
+                  y="800"
+                  width="1200"
+                  height={height - 800}
+                  fill="url(#campus-grid)"
+                />
+              )}
+              <image
+                className="campus-artwork"
+                href="/world/campus.png"
+                x="0"
+                y="0"
                 width="1200"
-                height={height}
-                rx="26"
-                fill="url(#campus-ground)"
+                height="800"
+                preserveAspectRatio="none"
+                aria-hidden="true"
               />
-              <rect width="1200" height={height} fill="url(#campus-grid)" />
-              <path
-                d={`M585 80V${height - 50} M70 420H1130`}
-                stroke="#34465c"
-                strokeWidth="60"
-                fill="none"
-              />
-              <path
-                d={`M585 80V${height - 50} M70 420H1130`}
-                stroke="#62748b"
-                strokeWidth="1"
-                strokeDasharray="7 12"
-                fill="none"
-              />
-              <circle
-                cx="585"
-                cy="570"
-                r="63"
-                fill="#1a2c40"
-                stroke="#496780"
-                strokeWidth="3"
-              />
-              <circle cx="585" cy="570" r="43" fill="#29455b" />
-              <path d="M561 580 585 546 609 580 585 594Z" fill="#7298b6" />
-              <path d="M585 546V594" stroke="#b4d9f0" strokeWidth="2" />
               {points.slice(1).map((p) => {
                 const c = data.companies.find((c) => c.id === p.id)!;
                 const parent =
@@ -526,7 +563,7 @@ export default function World({
                 return (
                   <path
                     key={p.id}
-                    d={`M${p.x} ${p.y + 45} V${p.y + 85} H${parent.x} V${parent.y + 45}`}
+                    d={`M${p.x} ${p.y + 90} Q${(p.x + parent.x) / 2} ${Math.max(p.y, parent.y) + 130} ${parent.x} ${parent.y + 90}`}
                     stroke={p.color}
                     strokeWidth="2"
                     strokeDasharray="4 9"
@@ -536,19 +573,6 @@ export default function World({
                   />
                 );
               })}
-              {[75, 425, 770, 1120].flatMap((x) =>
-                [420, 700].map((y) => (
-                  <g key={`${x}-${y}`} transform={`translate(${x} ${y})`}>
-                    <path
-                      d="M-16 10 0 16 16 10V18L0 24-16 18Z"
-                      fill="#2e4454"
-                    />
-                    <path d="M0 8V-17" stroke="#536e73" strokeWidth="4" />
-                    <circle cy="-20" r="16" fill="#37645b" />
-                    <circle cx="-5" cy="-24" r="10" fill="#4b8270" />
-                  </g>
-                )),
-              )}
               {points.map((p) => {
                 const status =
                   p.id === "holding"
@@ -562,16 +586,37 @@ export default function World({
                 return (
                   <g
                     key={p.id}
-                    className={`campus-station ${selectedPlace.id === p.id ? "selected" : ""}`}
+                    className={`campus-station ${p.art ? "art-station" : ""} ${selectedPlace.id === p.id ? "selected" : ""}`}
                     style={{ "--sector": p.color } as CSSProperties}
                   >
-                    <Building p={p} holding={p.id === "holding"} />
-                    <Equipment p={p} />
+                    {!p.art && (
+                      <>
+                        <Building p={p} holding={false} />
+                        <Equipment p={p} />
+                      </>
+                    )}
                     <foreignObject
-                      x={p.x - 125}
-                      y={p.y - 185}
-                      width="250"
-                      height="60"
+                      x={p.x - 150}
+                      y={p.y - 170}
+                      width="300"
+                      height="300"
+                    >
+                      <button
+                        className="building-hit"
+                        aria-label={`Entrer dans ${p.name}`}
+                        onClick={() => setSelected(p.id)}
+                      />
+                    </foreignObject>
+                    <foreignObject
+                      x={p.sign?.x ?? p.x - 145}
+                      y={p.sign?.y ?? p.y - 185}
+                      width={p.sign?.width ?? 290}
+                      transform={
+                        p.sign
+                          ? `rotate(${p.sign.angle}, ${p.sign.x + p.sign.width / 2}, ${p.sign.y + 31})`
+                          : undefined
+                      }
+                      height="62"
                     >
                       <button
                         className="station-label"
@@ -598,9 +643,7 @@ export default function World({
                           title={status.reason}
                           onClick={() => setSelected(p.id)}
                         >
-                          <FinanceRobot
-                            name={p.id === "holding" ? "FABI Holding" : p.name}
-                          />
+                          <CampusRobot name={p.spriteName} />
                           {status.kind === "sleeping" && (
                             <span className="sleep-sign">z Z</span>
                           )}
@@ -619,7 +662,7 @@ export default function World({
                     )}
                     <foreignObject
                       x={p.x - 100}
-                      y={p.y + 115}
+                      y={p.y + 92}
                       width="200"
                       height="45"
                     >
@@ -647,7 +690,7 @@ export default function World({
                   />
                   <foreignObject x="-33" y="-83" width="92" height="110">
                     <div className="courier-body">
-                      <FinanceRobot name={delivery.route[0].name} />
+                      <CampusRobot name={delivery.route[0].spriteName} />
                       <span className="paper-report">▤</span>
                     </div>
                   </foreignObject>

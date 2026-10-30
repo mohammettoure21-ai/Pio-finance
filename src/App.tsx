@@ -1,3 +1,4 @@
+import HermesSuggestions from "./components/HermesSuggestions";
 import World from "./components/World";
 import { ensureWeeklyReport, recordChanges, robotState } from "./finance/world";
 import FinanceRobot from "./components/FinanceRobot";
@@ -1747,6 +1748,18 @@ export default function App() {
               Rejoindre le campus
             </button>
           </div>
+          <HermesSuggestions
+            data={data}
+            onUpdate={commit}
+            onPrepare={(s) => {
+              setPio(false);
+              setTask({ ...s.task, id: uid(), done: false });
+            }}
+            onEdit={(id) => {
+              setPio(false);
+              setSelected(id);
+            }}
+          />
           <div className="notice">
             <strong>Avant toute modification</strong>
             <p>

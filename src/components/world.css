@@ -516,3 +516,190 @@
     transform: rotate(6deg);
   }
 }
+
+/* The campus uses a detailed game backdrop; names and actors stay live. */
+.world-shell {
+  background: #11171e;
+  border-color: #39424b;
+}
+.world-header {
+  background: linear-gradient(110deg, #202a35, #121920);
+  padding-top: 23px;
+  padding-bottom: 20px;
+}
+.world-tabs {
+  border-color: #35404a;
+}
+.world-tabs button.active {
+  background: #e8dfcb;
+  border-color: #e8dfcb;
+  color: #25292e;
+}
+.campus-scroll {
+  background: #17202c;
+  max-height: none;
+}
+.campus-artwork {
+  pointer-events: none;
+}
+.campus-route {
+  stroke-width: 2.3;
+  opacity: 0.65;
+  filter: drop-shadow(0 0 4px currentColor);
+  pointer-events: none;
+}
+.building-hit {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 35px;
+  background: transparent;
+  border: 2px solid transparent;
+}
+.building-hit:hover,
+.building-hit:focus-visible {
+  background: #ffffff06;
+  border-color: #ffffff44;
+  outline-offset: -2px;
+}
+.art-station .station-label {
+  height: 58px;
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+  border-radius: 4px;
+}
+.art-station .station-label strong {
+  font-size: 14px;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow:
+    0 2px 5px #000,
+    0 0 7px #000;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.art-station .station-label small {
+  font-size: 6px;
+  letter-spacing: 1.1px;
+  color: #e4dfd5;
+  text-shadow: 0 1px 4px #000;
+}
+.art-station.selected .station-label {
+  border-color: #ffffff55;
+  box-shadow: 0 0 14px #ffffff12;
+  background: #00000016;
+}
+.art-station .station-status {
+  background: #111820e8;
+  border-color: #8a959577;
+  color: #e1e6ed;
+  box-shadow: 0 3px 7px #0004;
+}
+.art-station .station-status.overloaded {
+  color: #ffbf91;
+  border-color: #cf986d;
+}
+.campus-robot-sprite {
+  flex-shrink: 0;
+  filter: drop-shadow(0 5px 3px #0006);
+}
+.world-robot.sleeping .campus-robot-sprite {
+  filter: saturate(0.8) brightness(0.9) drop-shadow(0 5px 3px #0006);
+}
+.world-robot .robot-desk {
+  bottom: 23px;
+  left: 29px;
+  font-size: 23px;
+  text-shadow: 0 2px 4px #0009;
+}
+.world-message {
+  background: #202a33;
+  border-color: #44505b;
+}
+.world-rules {
+  background: #17212b;
+}
+.world-detail {
+  background: #141e28;
+}
+.world-header .world-kicker {
+  color: #d1b981;
+}
+.sleep-sign {
+  text-shadow: 0 2px 5px #000;
+  color: #e3eaff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .campus-route {
+    filter: none;
+  }
+}
+
+.hermes-suggestions {
+  border-top: 1px solid #41536a;
+  border-bottom: 1px solid #41536a;
+  margin: 24px 0;
+  padding: 24px 0;
+}
+.hermes-suggestions h3 {
+  font-size: 22px;
+  line-height: 1.3;
+  margin-top: 10px;
+}
+.hermes-suggestions .field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 12px;
+  margin: 18px 0;
+}
+.hermes-suggestions textarea {
+  min-height: 95px;
+  resize: vertical;
+}
+.hermes-context {
+  padding: 16px;
+  border-radius: 9px;
+  background: #192634;
+}
+.hermes-context p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  color: #b4c3d3;
+  line-height: 1.6;
+}
+.hermes-proposals {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.hermes-proposals article {
+  padding: 16px;
+  border: 1px solid #3a4b60;
+  border-radius: 9px;
+  background: #151d27;
+}
+.hermes-proposals h4 {
+  margin: 7px 0;
+  font-size: 14px;
+}
+.hermes-proposals small {
+  color: #d1ba85;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.hermes-proposals p {
+  font-size: 11px;
+  color: #a6bbd2;
+  line-height: 1.6;
+}
+.hermes-proposals button {
+  font-size: 11px;
+  margin-bottom: 0;
+}

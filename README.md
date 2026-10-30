@@ -94,7 +94,7 @@ L’accueil ouvre maintenant un campus tech interactif. Les bâtiments et robots
 
 Les robots réagissent aux données locales :
 
-- **En veille** : aucune mission ni activité récente, ou trois jours sans action enregistrée. Les yeux se ferment et des « Z » apparaissent.
+- **En veille** : aucune mission ni activité récente, ou trois jours sans action enregistrée. Le robot se repose et des « Z » apparaissent.
 - **Au travail** : tâches ouvertes et activité récente (le début du suivi sert de repère pour les tâches préexistantes).
 - **À jour** : activité récente et aucune tâche ouverte.
 - **Débordé** : au moins six tâches ouvertes ou trois retards. Le robot montre sa fatigue et des gouttes de sueur. Cet état prévaut sur la veille.
@@ -110,10 +110,18 @@ Un journal daté est ajouté aux sauvegardes existantes sans inventer les dates 
 Le fonctionnement reste local au navigateur : pas d’exécution lorsque le site est fermé, pas de notification ou d’envoi externe automatique. Pour un vrai envoi programmé ou une IA conversationnelle, il faudra un backend authentifié et des services configurés.
 
 ```sh
-npm test # 14 tests portefeuille + 4 tests du monde
+npm test # 14 tests portefeuille + 4 tests du monde + 4 tests Hermès
 npm run build
 npm run dev -- --port 5173 --strictPort
 # Dans un autre terminal :
 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:e2e
 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/usr/bin/chromium npm run test:world
 ```
+
+### Décor et suggestions d’Hermès
+
+Le campus utilise un décor 3D pré-rendu et des personnages indépendants issus de visuels générés, conservés dans `public/world`. Les enseignes sont du texte interactif superposé aux façades : modifier le nom d’une société actualise son enseigne. Les quatre quartiers principaux restent disponibles après renommage ; les sociétés supplémentaires utilisent des ateliers sous le campus. Les robots, leurs états, les livraisons, les fiches et les bilans restent pilotés par les données, indépendamment du décor.
+
+Dans Hermès, renseignez la **Vision du groupe**, choisissez la **Société à accompagner** et complétez son activité, ses objectifs et ses jalons dans la fiche. Les suggestions locales utilisent ces éléments, la charge et les retards ; des pistes métier liées au nom de la société sont explicitement signalées comme à confirmer lorsque l’activité n’est pas renseignée. La vision enregistrée figure dans le contexte des propositions ; les priorités financières déclenchent une piste de suivi financier. Ce moteur est fondé sur des règles, sans analyse par une IA distante. Les titres déjà présents pour cette société sont exclus.
+
+**Examiner cette tâche** ouvre l’éditeur existant avec la société préremplie. Vous pouvez modifier ou annuler la proposition ; seule **Enregistrer la tâche** crée la mission. La vision est incluse dans les exports/imports, et les anciens fichiers restent compatibles. Une future IA devra utiliser les contrats d’intégration via un backend authentifié ; aucun secret n’est ajouté à l’application navigateur.

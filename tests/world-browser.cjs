@@ -22,6 +22,13 @@ const output = fs.mkdtempSync(
       .getByRole("heading", { name: "Un monde. Une vision." })
       .waitFor();
     assert.equal(await page.locator(".world-robot").count(), 5);
+    for (const asset of ["/world/campus.png", "/world/robots.png"]) {
+      const response = await page.request.get("http://127.0.0.1:5173" + asset);
+      assert.equal(response.status(), 200);
+      assert.ok((await response.body()).length > 10000);
+    }
+    assert.equal(await page.locator(".art-station .station-label").count(), 5);
+
     assert.equal(await page.locator(".world-robot.sleeping").count(), 4);
     await page.screenshot({
       path: path.join(output, "campus.png"),
@@ -71,13 +78,11 @@ const output = fs.mkdtempSync(
     assert.equal(deliveryEvents[1].recipient, "holding");
     page.on("dialog", (d) => d.accept());
     const importedEvents = saved.world.events.length;
-    await page
-      .locator("input[type=file]")
-      .setInputFiles({
-        name: "world-export.json",
-        mimeType: "application/json",
-        buffer: Buffer.from(JSON.stringify(saved)),
-      });
+    await page.locator("input[type=file]").setInputFiles({
+      name: "world-export.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(saved)),
+    });
     await page.getByText("Sauvegarde importée.", { exact: true }).waitFor();
     assert.equal(
       await page.evaluate(
@@ -100,6 +105,74 @@ const output = fs.mkdtempSync(
       .getByRole("heading", { name: "Le poste de pilotage de votre monde" })
       .waitFor();
     await page.getByText("IA non connectée", { exact: true }).waitFor();
+    await page
+      .getByLabel("Vision du groupe", { exact: true })
+      .fill("Développer les formations et améliorer leur rentabilité");
+    await page
+      .getByRole("button", { name: "Enregistrer la vision", exact: true })
+      .click();
+    await page
+      .getByLabel("Société à accompagner", { exact: true })
+      .selectOption({ label: "Afrodemy" });
+    await page
+      .getByRole("heading", {
+        name: "Préparer le suivi financier de Afrodemy",
+        exact: true,
+      })
+      .waitFor();
+    const beforeSuggestion = await page.evaluate(
+      () => JSON.parse(localStorage.getItem("pio-finance-v1")).tasks.length,
+    );
+    await page
+      .getByRole("button", {
+        name: "Examiner la suggestion 1 pour Afrodemy",
+        exact: true,
+      })
+      .click();
+    assert.equal(
+      await page.getByLabel("Titre", { exact: true }).inputValue(),
+      "Préparer le suivi financier de Afrodemy",
+    );
+    assert.equal(
+      await page.evaluate(
+        () => JSON.parse(localStorage.getItem("pio-finance-v1")).tasks.length,
+      ),
+      beforeSuggestion,
+    );
+    await page
+      .getByRole("button", { name: "Enregistrer la tâche", exact: true })
+      .click();
+    const afterSuggestion = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("pio-finance-v1")),
+    );
+    assert.equal(afterSuggestion.tasks.length, beforeSuggestion + 1);
+    assert.equal(
+      afterSuggestion.tasks.at(-1).companyId,
+      afterSuggestion.companies.find((c) => c.name === "Afrodemy").id,
+    );
+    assert.equal(
+      afterSuggestion.vision,
+      "Développer les formations et améliorer leur rentabilité",
+    );
+    await page
+      .getByRole("button", { name: "Hermès Ouvrir le poste de pilotage" })
+      .click();
+    await page
+      .getByLabel("Société à accompagner", { exact: true })
+      .selectOption({ label: "Afrodemy" });
+    assert.equal(
+      await page
+        .getByRole("heading", {
+          name: "Préparer le suivi financier de Afrodemy",
+          exact: true,
+        })
+        .count(),
+      0,
+    );
+    console.log(
+      "PASS company-specific suggestions, saved vision, explicit task confirmation and no duplicates",
+    );
+
     await page.getByRole("button", { name: "Fermer", exact: true }).click();
     console.log(
       "PASS interactive campus, mission, automatic paper delivery via parent, persistence and Hermes",
@@ -173,6 +246,38 @@ const output = fs.mkdtempSync(
       path: path.join(output, "mobile.png"),
       fullPage: true,
     });
+
+    await page.setViewportSize({ width: 1440, height: 1100 });
+    await page
+      .getByRole("button", { name: "Ouvrir FABI Immobilier", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: "Ouvrir la fiche", exact: true })
+      .click();
+    await page
+      .getByLabel("Nom de l’entreprise", { exact: true })
+      .fill("FABI Immobilier Groupe");
+    await page
+      .getByRole("button", { name: "Enregistrer", exact: true })
+      .click();
+    assert.equal(
+      await page
+        .locator(".art-station .station-label")
+        .filter({ hasText: "FABI Immobilier Groupe" })
+        .count(),
+      1,
+    );
+    await page.reload();
+    assert.equal(
+      await page
+        .locator(".art-station .station-label")
+        .filter({ hasText: "FABI Immobilier Groupe" })
+        .count(),
+      1,
+    );
+    console.log(
+      "PASS live facade names follow company edits and remain on the original campus",
+    );
     assert.deepEqual(errors, []);
     console.log(
       "PASS overload, weekly archive, deduplication, reduced motion, mobile and no browser exceptions",
