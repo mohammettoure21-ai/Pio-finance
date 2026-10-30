@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
 export type RobotMood =
@@ -12,6 +13,7 @@ export function mountRobot(
   canvas: HTMLCanvasElement,
   color: string,
   mood: RobotMood,
+  getMood: () => RobotMood = () => mood,
 ) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -19,12 +21,28 @@ export function mountRobot(
     antialias: true,
     powerPreference: "low-power",
   });
+  const gl = renderer.getContext();
+  const debug = gl.getExtension("WEBGL_debug_renderer_info");
+  const software = debug
+    ? /swiftshader|llvmpipe|software/i.test(
+        String(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)),
+      )
+    : false;
   renderer.setPixelRatio(
-    Math.min(Math.max(window.devicePixelRatio || 1, 2), 2.5),
+    software ? 1 : Math.min(Math.max(window.devicePixelRatio || 1, 2), 2.5),
   );
+  const frameRate = software ? 4 : 24;
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
+  // Studio reflections make the lacquered shells read like the reference toys.
+  const studio = new RoomEnvironment();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const environment = pmrem.fromScene(studio, 0.04, 0.1, 10, { size: 64 });
+  scene.environment = environment.texture;
+  scene.environmentIntensity = 0.7;
+  studio.dispose();
+  pmrem.dispose();
   const camera = new THREE.OrthographicCamera(-1.1, 1.1, 1.4, -1.4, 0.1, 30);
   camera.position.set(2, 1.1, 6);
   camera.lookAt(0, 0.05, 0);
@@ -37,8 +55,8 @@ export function mountRobot(
   scene.add(rim);
   const shell = new THREE.MeshStandardMaterial({
     color,
-    metalness: 0.55,
-    roughness: 0.28,
+    metalness: 0.65,
+    roughness: 0.2,
   });
   const dark = new THREE.MeshStandardMaterial({
     color: 0x151b25,
@@ -58,7 +76,7 @@ export function mountRobot(
   const glow = new THREE.MeshStandardMaterial({
     color: 0xe5dfff,
     emissive: 0x9b87ef,
-    emissiveIntensity: 1.7,
+    emissiveIntensity: 0.85,
     roughness: 0.4,
   });
   const robot = new THREE.Group();
@@ -88,29 +106,94 @@ export function mountRobot(
   const head = new THREE.Group();
   head.position.set(0, 0.68, 0);
   body.add(head);
-  mesh(box(1.32, 1.02, 0.87, 0.3), shell, head);
-  mesh(box(1.13, 0.79, 0.12, 0.25), chrome, head, 0, -0.015, 0.422);
-  mesh(box(1.08, 0.74, 0.14, 0.23), screen, head, 0, -0.015, 0.465);
-  // Helmet seam and soft highlights recover the original rounded toy design.
-  const seam = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-0.5, 0.34, 0.34),
-    new THREE.Vector3(0, 0.48, 0.35),
-    new THREE.Vector3(0.5, 0.34, 0.34),
-  ]);
-  mesh(new THREE.TubeGeometry(seam, 20, 0.013, 6, false), dark, head);
-  for (const side of [-1, 1]) {
-    const ear = mesh(
-      new THREE.CylinderGeometry(0.22, 0.22, 0.15, 24),
-      dark,
-      head,
-      side * 0.67,
+  // Reference silhouette: domed helmet and matching colored face, with separate eye cups.
+  const helmet = mesh(sphere(1), shell, head);
+  helmet.scale.set(0.7, 0.56, 0.51);
+  function facePlate(
+    width: number,
+    height: number,
+    radius: number,
+    material: THREE.Material,
+    z: number,
+  ) {
+    const shape = new THREE.Shape();
+    const x = -width / 2,
+      y = -height / 2;
+    shape.moveTo(x + radius, y);
+    shape.lineTo(x + width - radius, y);
+    shape.quadraticCurveTo(x + width, y, x + width, y + radius);
+    shape.lineTo(x + width, y + height - radius);
+    shape.quadraticCurveTo(
+      x + width,
+      y + height,
+      x + width - radius,
+      y + height,
     );
-    ear.rotation.z = Math.PI / 2;
-    const ring = mesh(
-      new THREE.TorusGeometry(0.16, 0.027, 8, 24),
+    shape.lineTo(x + radius, y + height);
+    shape.quadraticCurveTo(x, y + height, x, y + height - radius);
+    shape.lineTo(x, y + radius);
+    shape.quadraticCurveTo(x, y, x + radius, y);
+    mesh(
+      new THREE.ExtrudeGeometry(shape, {
+        depth: 0.06,
+        bevelEnabled: true,
+        bevelThickness: 0.008,
+        bevelSize: 0.008,
+        bevelSegments: 2,
+        curveSegments: 12,
+      }),
+      material,
+      head,
+      0,
+      -0.025,
+      z,
+    );
+  }
+  facePlate(1.12, 0.86, 0.29, dark, 0.466);
+  facePlate(1.085, 0.825, 0.28, shell, 0.482);
+  const seam = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-0.56, 0.29, 0.31),
+    new THREE.Vector3(-0.34, 0.49, 0.25),
+    new THREE.Vector3(0, 0.55, 0.16),
+    new THREE.Vector3(0.34, 0.49, 0.25),
+    new THREE.Vector3(0.56, 0.29, 0.31),
+  ]);
+  mesh(new THREE.TubeGeometry(seam, 28, 0.012, 6, false), dark, head);
+  for (const side of [-1, 1]) {
+    const joint = mesh(
+      new THREE.CylinderGeometry(0.28, 0.28, 0.18, 32),
       chrome,
       head,
-      side * 0.76,
+      side * 0.68,
+      -0.01,
+      -0.015,
+    );
+    joint.rotation.z = Math.PI / 2;
+    const ear = mesh(
+      new THREE.CylinderGeometry(0.235, 0.25, 0.15, 32),
+      dark,
+      head,
+      side * 0.77,
+      -0.01,
+      -0.015,
+    );
+    ear.rotation.z = Math.PI / 2;
+    const cap = mesh(
+      new THREE.CylinderGeometry(0.185, 0.19, 0.045, 32),
+      screen,
+      head,
+      side * 0.86,
+      -0.01,
+      -0.015,
+    );
+    cap.rotation.z = Math.PI / 2;
+    const ring = mesh(
+      new THREE.TorusGeometry(0.22, 0.018, 10, 32),
+      chrome,
+      head,
+      side * 0.854,
+      -0.01,
+      -0.015,
     );
     ring.rotation.y = Math.PI / 2;
   }
@@ -118,44 +201,52 @@ export function mountRobot(
   head.add(eyes);
   const lids = new THREE.Group();
   head.add(lids);
-  for (const x of [-0.24, 0.24]) {
-    mesh(
-      new THREE.TorusGeometry(0.155, 0.046, 12, 32),
+  for (const x of [-0.255, 0.255]) {
+    const socket = mesh(sphere(1), screen, head, x, -0.035, 0.54);
+    socket.scale.set(0.205, 0.237, 0.062);
+    const iris = mesh(
+      new THREE.TorusGeometry(0.13, 0.04, 14, 36),
       glow,
       eyes,
       x,
-      0.025,
-      0.568,
+      -0.035,
+      0.61,
     );
-    const pupil = mesh(sphere(0.108), dark, eyes, x, 0.025, 0.58);
-    pupil.scale.z = 0.26;
-    mesh(sphere(0.032), glow, eyes, x - 0.033, 0.073, 0.611);
+    iris.scale.y = 1.12;
+    const pupil = mesh(sphere(0.1), screen, eyes, x, -0.035, 0.625);
+    pupil.scale.set(1, 1.1, 0.32);
+    mesh(sphere(0.031), glow, eyes, x - 0.035, 0.014, 0.663);
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(x - 0.12, 0.02, 0.58),
-      new THREE.Vector3(x, -0.025, 0.59),
-      new THREE.Vector3(x + 0.12, 0.02, 0.58),
+      new THREE.Vector3(x - 0.125, -0.02, 0.613),
+      new THREE.Vector3(x, -0.065, 0.625),
+      new THREE.Vector3(x + 0.125, -0.02, 0.613),
     ]);
-    mesh(new THREE.TubeGeometry(curve, 12, 0.017, 6, false), glow, lids);
+    mesh(new THREE.TubeGeometry(curve, 14, 0.017, 6, false), glow, lids);
   }
-  const smile = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-0.07, -0.22, 0.58),
-    new THREE.Vector3(0, -0.24, 0.59),
-    new THREE.Vector3(0.07, -0.22, 0.58),
-  ]);
-  mesh(new THREE.TubeGeometry(smile, 10, 0.012, 6, false), glow, head);
   const arms: { root: THREE.Group; elbow: THREE.Group }[] = [];
   for (const side of [-1, 1]) {
     const root = new THREE.Group();
     root.position.set(side * 0.43, 0.09, 0);
     body.add(root);
     mesh(sphere(0.13), chrome, root);
-    mesh(box(0.18, 0.3, 0.2), shell, root, 0, -0.19);
+    const upperArmor = mesh(sphere(1), shell, root, 0, -0.19);
+    upperArmor.scale.set(0.12, 0.18, 0.14);
     const elbow = new THREE.Group();
     elbow.position.y = -0.37;
     root.add(elbow);
     mesh(sphere(0.095), dark, elbow);
-    mesh(box(0.16, 0.24, 0.18), shell, elbow, 0, -0.15);
+    const forearmArmor = mesh(sphere(1), shell, elbow, 0, -0.15);
+    forearmArmor.scale.set(0.105, 0.16, 0.13);
     mesh(sphere(0.105), dark, elbow, 0, -0.31);
+    for (let finger = 0; finger < 3; finger++)
+      mesh(
+        box(0.037, 0.09, 0.055, 0.015),
+        dark,
+        elbow,
+        -0.055 + finger * 0.055,
+        -0.38,
+        0.035,
+      );
     arms.push({ root, elbow });
   }
   const legs: { root: THREE.Group; knee: THREE.Group }[] = [];
@@ -168,7 +259,9 @@ export function mountRobot(
     const knee = new THREE.Group();
     knee.position.y = -0.35;
     root.add(knee);
-    mesh(sphere(0.11), chrome, knee);
+    mesh(sphere(0.11), dark, knee);
+    const kneeArmor = mesh(sphere(1), shell, knee, 0, -0.015, 0.085);
+    kneeArmor.scale.set(0.115, 0.12, 0.065);
     mesh(box(0.19, 0.24, 0.2), shell, knee, 0, -0.15);
     mesh(box(0.29, 0.14, 0.4), shell, knee, 0, -0.32, 0.09);
     legs.push({ root, knee });
@@ -271,6 +364,8 @@ export function mountRobot(
   const media = window.matchMedia("(prefers-reduced-motion: reduce)");
   const seed = Number.parseInt(color.replace("#", ""), 16) % 17;
   function pose(time: number) {
+    mood = getMood();
+    workstation.visible = mood !== "walking";
     const t = time + seed;
     const sleeping = mood === "sleeping";
     eyes.visible = !sleeping;
@@ -331,7 +426,9 @@ export function mountRobot(
   function render(time: number) {
     if (disposed) return;
     frame = requestAnimationFrame(render);
-    if (!visible || document.hidden || time - lastFrame < 1000 / 24) return;
+    if (getMood() !== mood) lastFrame = -100;
+    if (!visible || document.hidden || time - lastFrame < 1000 / frameRate)
+      return;
     if (media.matches && lastFrame >= 0) return;
     lastFrame = time;
     pose(media.matches ? 0 : time / 1000);
@@ -372,6 +469,7 @@ export function mountRobot(
         materials.forEach((m) => m.dispose());
       }
     });
+    environment.dispose();
     renderer.dispose();
     renderer.forceContextLoss();
   };

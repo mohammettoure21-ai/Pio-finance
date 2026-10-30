@@ -130,10 +130,14 @@ Dans Hermès, renseignez la **Vision du groupe**, choisissez la **Société à a
 
 Les robots du campus sont des modèles 3D articulés : tête, bras, coudes, jambes et genoux s’animent indépendamment. Ils sont plus petits que les anciennes silhouettes en image. Au travail, les mains s’activent ; le général observe et donne des indications ; la marche articule les jambes lors des livraisons. En veille, le robot s’assoit, baisse la tête, ferme ses yeux et respire lentement. En surcharge, il s’essuie le front et une goutte de sueur descend.
 
-Le moteur 3D est chargé à la demande. Le rendu est limité à 24 images par seconde, suspendu hors écran ou dans un onglet masqué, et reste statique lorsque la réduction des animations est demandée. Les géométries et contextes sont libérés à la fermeture ou au changement d’état. En l’absence de WebGL, un robot vectoriel assure un repli avec yeux fermés en veille. Aucune donnée métier n’est modifiée par les animations.
+Le moteur 3D est chargé à la demande. Le rendu est limité à 24 images par seconde, suspendu hors écran ou dans un onglet masqué, et reste statique lorsque la réduction des animations est demandée. Les géométries et contextes sont libérés à la fermeture et réutilisés lors des changements d’état. En l’absence de WebGL, un robot vectoriel assure un repli avec yeux fermés en veille. Aucune donnée métier n’est modifiée par les animations.
 
 La vue de départ du campus est compacte (960 px maximum sur grand écran), centrée dans son cadre. Les boutons de zoom permettent d’agrandir ou de réduire le monde ; sur mobile, sa largeur minimale est réduite à 600 px pour limiter le défilement.
 
 Les connexions du campus sont des tirets colorés de 6 px, avec un fond sombre pour rester visibles sur les bâtiments. Leur épaisseur reste constante pendant le zoom.
 
 Les robots reprennent les proportions du design initial : casque arrondi, grands yeux blanc-violet lumineux, coques noires/jaunes/roses/vertes/blanches et articulations métalliques. Chacun dispose d’un bureau, d’un écran et d’un clavier en 3D. Les robots disponibles préparent leur travail à l’ordinateur, les robots avec missions tapent plus activement ; les livraisons restent des déplacements à pied sans bureau. La veille après trois jours et les données métier restent inchangées.
+
+Le modèle de référence possède désormais une tête bombée avec un panneau facial de la couleur de la coque, deux logements noirs individuels pour les yeux blanc-violet, des oreilles en disques métalliques et des protections arrondies sur les articulations. Les reflets sont rendus avec un environnement lumineux de studio, sans image de personnage.
+
+Sur un moteur WebGL logiciel, la cadence des robots est limitée à 4 images par seconde et la définition du rendu est réduite pour préserver la réactivité. Les visages et les états restent les mêmes.

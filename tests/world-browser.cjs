@@ -70,6 +70,7 @@ const output = fs.mkdtempSync(
       path: path.join(output, "campus.png"),
       fullPage: true,
     });
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page
       .getByRole("button", { name: "Ouvrir FABI Conciergerie", exact: true })
       .click();
@@ -79,6 +80,7 @@ const output = fs.mkdtempSync(
       .getByRole("button", { name: "Enregistrer la tâche", exact: true })
       .click();
     assert.equal(await page.locator(".world-robot.working").count(), 1);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page
       .getByRole("button", {
         name: "Terminer la mission Préparer le séjour",
@@ -103,6 +105,7 @@ const output = fs.mkdtempSync(
         exact: true,
       })
       .waitFor();
+    await page.emulateMedia({ reducedMotion: "reduce" });
     const saved = await page.evaluate(() =>
       JSON.parse(localStorage.getItem("pio-finance-v1")),
     );

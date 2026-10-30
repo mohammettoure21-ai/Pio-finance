@@ -21,6 +21,8 @@ export default function CampusRobot({
             ? "#26b887"
             : "#e6ecf2";
   const canvas = useRef<HTMLCanvasElement>(null);
+  const currentMood = useRef(mood);
+  currentMood.current = mood;
   const [ready, setReady] = useState(false);
   useEffect(() => {
     let active = true;
@@ -30,7 +32,12 @@ export default function CampusRobot({
       .then(({ mountRobot }) => {
         if (!active || !canvas.current) return;
         try {
-          cleanup = mountRobot(canvas.current, color, mood);
+          cleanup = mountRobot(
+            canvas.current,
+            color,
+            currentMood.current,
+            () => currentMood.current,
+          );
           setReady(true);
         } catch {
           setReady(false);
@@ -43,7 +50,7 @@ export default function CampusRobot({
       active = false;
       cleanup?.();
     };
-  }, [color, mood]);
+  }, [color]);
   return (
     <span
       className="finance-robot campus-robot-actor"
