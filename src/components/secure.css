@@ -1,0 +1,10 @@
+.secure-connection { margin: 0 0 20px; padding: 12px 16px; border: 1px solid #333; border-radius: 12px; font-size: .85rem; }
+.secure-connection summary { cursor: pointer; font-weight: 600; }
+.secure-connection p { line-height: 1.6; overflow-wrap: anywhere; }
+.secure-connection form { display: grid; gap: 10px; max-width: 650px; }
+.secure-connection label:not(.secure-consent) { display: grid; gap: 5px; }
+.secure-connection input:not([type="checkbox"]), .secure-connection select { width: 100%; padding: 9px; border: 1px solid #555; border-radius: 6px; background: #151515; color: white; }
+.secure-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.secure-consent { display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+.secure-proposal { border-top: 1px solid #444; margin-top: 16px; padding-top: 8px; }
+.secure-connection button:disabled { opacity: .45; cursor: not-allowed; }

@@ -1,6 +1,6 @@
 # PIO × Finance
 
-Carte interactive pour suivre ses entreprises et préparer une future holding. React 19, TypeScript et Vite. Aucun backend ni service externe connecté.
+Carte interactive pour suivre ses entreprises et préparer une future holding. React 19, TypeScript et Vite. Mode local inchangé par défaut ; backend privé Node/SQLite et connecteur MCP optionnels, sans IA ni service externe activé. Voir [le guide opérateur](docs/SECURE-BRIDGE.md).
 
 ## Développer
 
@@ -26,9 +26,9 @@ Le build de production est généré dans `dist`. Ce projet utilise le dépôt i
 
 ## Données et confidentialité
 
-Les données sont stockées dans le navigateur sous `pio-finance-v1`, sans transmission à un serveur. Les anciennes clés Life System restent intactes. Le site public contient uniquement les quatre noms initiaux, sans données financières personnelles.
+Les données sont stockées dans le navigateur sous `pio-finance-v1`, sans transmission automatique. Un partage vers le backend local exige connexion personnelle, avertissement et consentement explicites. Les anciennes clés Life System restent intactes. Le site public contient uniquement les quatre noms initiaux, sans données financières personnelles.
 
-Ce prototype n’a pas d’authentification, de chiffrement local, de synchronisation ni de sauvegarde distante. Utilisez un navigateur/profil personnel. Les boutons d’export et d’import JSON permettent de sauvegarder et restaurer les données. L’import valide le schéma, les références et les cycles, puis demande confirmation avant de remplacer la sauvegarde. Les exports peuvent contenir des informations privées : ne les ajoutez jamais au dépôt.
+Le stockage navigateur n’est pas chiffré. Le backend optionnel possède une authentification et des versions persistantes ; aucun déploiement ni serveur distant n’est configuré. Les échanges Push/Pull restent manuels. Utilisez un navigateur/profil personnel. Les boutons d’export et d’import JSON permettent de sauvegarder et restaurer les données. L’import valide le schéma, les références et les cycles, puis demande confirmation avant de remplacer la sauvegarde. Les exports peuvent contenir des informations privées : ne les ajoutez jamais au dépôt.
 
 Le chiffre d’affaires, le résultat, la trésorerie et les dividendes reçus sont des champs distincts. La valeur indicative d’une participation utilise uniquement la valeur des capitaux propres et votre pourcentage personnel effectif, avec devise, date et méthode obligatoires. Aucun total consolidé mère + filiales n’est calculé : il risquerait de compter deux fois les mêmes valeurs. Les biens gérés pour un client ont une nature explicite et ne sont pas présentés comme des actifs personnels.
 
@@ -48,13 +48,13 @@ Le test navigateur utilise un profil éphémère et des données fictives. Pour 
 
 ## Vercel
 
-Créer un nouveau projet Vercel `pio-finance` relié à ce dépôt GitHub, branche de production `main`, framework Vite, commande `npm run build`, sortie `dist`. `vercel.json` fixe ces valeurs et les en-têtes de sécurité. Aucune variable d’environnement n’est nécessaire pour cette version. Si l’intégration GitHub est active, un push sur `main` doit lancer le déploiement ; son succès doit être vérifié dans Vercel.
+`vercel.json` conserve la configuration historique du site statique et désactive les déploiements Git pour la branche de partage `feat/hermes-holding-bridge`. Publier cette branche permet la revue du code, pas une mise en production. Aucun changement de service réel n’est réalisé dans cette intégration. Le build Vite ne contient pas le backend. Aucun proxy API de production ni URL distante n’est prédéfini : une éventuelle mise en service attend une validation distincte et HTTPS.
 
 ## Intégrations futures
 
 Hermès affiche **IA non connectée**, sans réponses simulées. WhatsApp et les rappels automatiques ne sont pas connectés ; aucun envoi externe n’est effectué. Les alertes de suivi sont maintenant calculées à partir des tâches ; les anciens champs de statut manuel restent conservés dans les sauvegardes mais ne commandent plus les couleurs de la carte.
 
-`src/finance/integrations.ts` définit les contrats pour un futur service IA, de rappels et WhatsApp. Une connexion réelle exigera un backend authentifié, des secrets côté serveur et une validation des droits. Les propositions de modification IA devront être récapitulées puis confirmées avant toute application. Les notes peuvent déjà être ajoutées manuellement depuis Hermès, avec aperçu et confirmation. La CSP actuelle limite les connexions au même domaine ; elle devra être adaptée uniquement aux services effectivement connectés.
+`src/finance/integrations.ts` conserve les contrats IA, rappels et WhatsApp, toujours désactivés. Le backend authentifié et le connecteur MCP locaux sont documentés séparément ; leur présence n’active aucun modèle ni profil Hermes. Les propositions de modification IA devront être récapitulées puis confirmées avant toute application. Les notes peuvent déjà être ajoutées manuellement depuis Hermès, avec aperçu et confirmation. La CSP actuelle limite les connexions au même domaine ; elle devra être adaptée uniquement aux services effectivement connectés.
 
 ## Carte et suivi V2
 

@@ -1,0 +1,33 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {agentFixture} from './bridge-fixture.mjs';
+const task=companyId=>({companyId,title:'Synthetic mission',priority:'Normale',assignee:'',due:''});
+test('agent proposals are scoped, owner editable/refusable, and confirmation creates exactly one company-bound mission',async()=> {
+ await agentFixture(async({req,portfolio,store})=>{
+  const companyId=portfolio.companies[3].id;
+  const payload={task:task(companyId),expectedRevision:1,idempotencyKey:'agent-proposal-01'};
+  assert.equal((await req('owner','/proposals','POST',payload)).status,403);
+  assert.equal((await req('mbtg','/proposals','POST',{...payload,task:task(portfolio.companies[0].id)})).status,403);
+  const created=await req('mbtg','/proposals','POST',payload);assert.equal(created.status,200);
+  assert.deepEqual((await req('mbtg','/proposals','POST',payload)).data,created.data);
+  assert.equal((await req('mbtg','/proposals','POST',{...payload,task:{...payload.task,title:'changed'}})).status,409);
+  const p=created.data.proposal; assert.equal(p.task.companyId,companyId); assert.equal(p.status,'pending');
+  assert.equal((await req('immobilier','/proposals')).data.proposals.length,0);
+  assert.equal((await req('holding','/proposals')).data.proposals.length,1);
+  assert.equal((await req('mbtg',`/proposals/${p.id}/confirm`,'POST',{})).status,403);
+  const edit={task:{...p.task,title:'Owner reviewed'},expectedRevision:1,proposalRevision:1,idempotencyKey:'edit-proposal-01'};
+  assert.equal((await req('owner',`/proposals/${p.id}`,'PATCH',{...edit,task:{...edit.task,companyId:portfolio.companies[0].id}})).status,400);
+  const edited=await req('owner',`/proposals/${p.id}`,'PATCH',edit); assert.equal(edited.status,200); assert.equal(edited.data.proposal.proposalRevision,2);
+  const confirm={expectedRevision:1,proposalRevision:2,idempotencyKey:'confirm-proposal-01'};
+  assert.equal((await req('owner',`/proposals/${p.id}/confirm`,'POST',{...confirm,proposalRevision:1})).status,409);
+  const [a,b]=await Promise.all([req('owner',`/proposals/${p.id}/confirm`,'POST',confirm),req('owner',`/proposals/${p.id}/confirm`,'POST',confirm)]);
+  assert.equal(a.status,200); assert.deepEqual(a.data,b.data); assert.equal(a.data.revision,2);
+  assert.equal((await req('owner',`/proposals/${p.id}/confirm`,'POST',{...confirm,expectedRevision:2})).status,409);
+  const current=(await req('owner','/portfolio')).data;
+  assert.equal(current.portfolio.tasks.filter(t=>t.title==='Owner reviewed').length,1); assert.equal(current.portfolio.tasks.at(-1).companyId,companyId);
+  const second=(await req('mbtg','/proposals','POST',{...payload,expectedRevision:2,idempotencyKey:'agent-proposal-02'})).data.proposal;
+  assert.equal((await req('owner',`/proposals/${second.id}/reject`,'POST',{proposalRevision:1,idempotencyKey:'reject-proposal-01'})).status,200);
+  assert.equal((await req('owner',`/proposals/${second.id}/confirm`,'POST',{expectedRevision:2,proposalRevision:2,idempotencyKey:'confirm-rejected-01'})).status,409);
+  assert.equal(store.read().versions.length,2);
+ });
+});

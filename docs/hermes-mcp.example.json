@@ -1,0 +1,16 @@
+{
+  "mcp_servers": {
+    "pio_finance": {
+      "command": "C:/Users/hp/AppData/Local/hermes/tools/node-26.7.0-win32-x64/node.exe",
+      "args": ["C:/Users/hp/AppData/Local/hermes/workspaces/fabi-holding/pio-finance/server/mcp.mjs"],
+      "env": {
+        "PIO_API_URL": "http://127.0.0.1:8787/api/pio",
+        "PIO_AGENT_TOKEN_FILE": "C:/PRIVATE-PIO/keys/mbtg.token"
+      },
+      "timeout": 30,
+      "connect_timeout": 15,
+      "sampling": { "enabled": false },
+      "tools": { "include": ["pio_read_context", "pio_propose_mission"] }
+    }
+  }
+}

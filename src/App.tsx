@@ -1,3 +1,4 @@
+import SecureConnection from "./components/SecureConnection";
 import HermesSuggestions from "./components/HermesSuggestions";
 import World from "./components/World";
 import { ensureWeeklyReport, recordChanges, robotState } from "./finance/world";
@@ -1044,6 +1045,12 @@ export default function App() {
           </div>
         </header>
         <main>
+          <SecureConnection data={data} onReplace={(next) => {
+            validatePortfolio(next);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+            setData(next);
+            setStorageError("");
+          }} />
           <div className="page-heading">
             <div>
               <span className="eyebrow">L’AMBITION PREND FORME</span>
@@ -1895,11 +1902,13 @@ export default function App() {
         >
           <p>
             Ce prototype conserve vos données dans le stockage local de ce
-            navigateur. Elles ne sont envoyées à aucun serveur. Le site public
+            navigateur. Aucun envoi automatique : la connexion et chaque partage
+            exigent une action explicite dans « Connexion sécurisée ». Le site public
             ne contient que quatre noms d’entreprises et des champs vides.
           </p>
           <p>
-            Ce stockage n’est ni chiffré ni synchronisé. Sur un appareil
+            Ce stockage n’est pas chiffré ; les synchronisations sont uniquement
+            volontaires. Sur un appareil
             partagé, les autres utilisateurs du navigateur peuvent y accéder.
             Utilisez un profil personnel et conservez vos exports JSON dans un
             endroit sûr.

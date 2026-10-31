@@ -1,0 +1,60 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+import {existsSync} from 'node:fs';
+import {chromium} from 'playwright';
+import {agentFixture} from './bridge-fixture.mjs';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+test('browser opt-in: zero automatic API requests, personal login, consent upload, reviewed single mission and local backup', {timeout:90000},async()=> {
+ await agentFixture(async({req,portfolio,store,base})=> {
+  store.transaction(s=>{s.portfolio=null;s.revision=0;s.versions=[];});
+  const port=new URL(base).port;
+  const vite=spawn(process.execPath,['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port','5173','--strictPort'],{cwd:root,env:{...process.env,PIO_DEV_API_PORT:port},stdio:['ignore','pipe','pipe']});
+  let output='';const collect=b=>{output+=b.toString().replace(/\u001b\[[0-9;]*m/g,'');};vite.stdout.on('data',collect);vite.stderr.on('data',collect);
+  let browser;
+  try {
+   for(let i=0;i<100 && !output.includes('http://127.0.0.1:5173');i++){if(vite.exitCode!==null)throw new Error('Vite failed: '+output);await sleep(100);}
+   assert.ok(output.includes('http://127.0.0.1:5173'),'Vite loopback ready');
+   const bundled=chromium.executablePath();
+   const executablePath=process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || (existsSync(bundled)?bundled:'C:/Program Files/Google/Chrome/Application/chrome.exe');
+   browser=await chromium.launch({executablePath,headless:true});
+   const context=await browser.newContext({reducedMotion:'reduce'});
+   await context.addInitScript(p=>localStorage.setItem('pio-finance-v1',JSON.stringify(p)),portfolio);
+   const page=await context.newPage(); const requests=[];
+   page.on('request',r=>{if(r.url().includes('/api/pio/'))requests.push({url:r.url(),method:r.method()});});
+   await page.goto('http://127.0.0.1:5173');
+   await page.getByText('Connexion sécurisée',{exact:true}).click({timeout:10000});
+   assert.equal(requests.length,0,'opening panel must not transmit anything');
+   await page.getByLabel('Mot de passe personnel').fill('synthetic-test-password-01');
+   await page.getByRole('button',{name:'Se connecter personnellement',exact:true}).click();
+   await page.getByText('Session propriétaire active',{exact:true}).waitFor();
+   assert.equal(requests.filter(r=>r.method!=='GET').length,1);
+   await page.getByRole('button',{name:'Lire le serveur',exact:true}).click();
+   await page.getByText('Serveur vide — révision 0',{exact:true}).waitFor();
+   assert.equal(await page.getByRole('button',{name:'Initialiser le serveur vide',exact:true}).isDisabled(),true);
+   await page.getByLabel('Je consens à partager ce portefeuille avec le backend local et les agents autorisés.').check();
+   await page.getByRole('button',{name:'Initialiser le serveur vide',exact:true}).click();
+   await page.getByText('Serveur lu — révision 1',{exact:true}).waitFor();
+   assert.equal((await req('owner','/portfolio')).data.revision,1);
+   const t={companyId:portfolio.companies[3].id,title:'Browser synthetic mission',priority:'Normale',assignee:'',due:''};
+   const made=await req('mbtg','/proposals','POST',{task:t,expectedRevision:1,idempotencyKey:'browser-proposal-test'});assert.equal(made.status,200);
+   await page.getByRole('button',{name:'Lire le serveur',exact:true}).click();
+   await page.getByLabel('Titre de la proposition').fill('Browser reviewed mission');
+   await page.getByRole('button',{name:'Enregistrer la révision de proposition',exact:true}).click();
+   await page.getByText('Proposition révisée ; relisez avant confirmation.',{exact:true}).waitFor();
+   page.once('dialog',d=>d.accept());
+   await page.getByRole('button',{name:'Confirmer une mission',exact:true}).click();
+   await page.getByText('Mission confirmée sur le serveur et reçue localement.',{exact:true}).waitFor();
+   const local=await page.evaluate(()=>JSON.parse(localStorage.getItem('pio-finance-v1')));
+   assert.equal(local.tasks.filter(t=>t.title==='Browser reviewed mission').length,1);
+   assert.equal(local.tasks.at(-1).companyId,t.companyId);
+   assert.ok(await page.evaluate(()=>Object.keys(localStorage).some(k=>k.startsWith('pio-finance-backup-'))));
+   assert.equal(store.read().portfolio.tasks.filter(t=>t.title==='Browser reviewed mission').length,1);
+   assert.equal(requests.filter(r=>r.url.endsWith('/portfolio/initialize') && r.method==='POST').length,1);
+   assert.equal(requests.filter(r=>r.method==='PUT').length,0,'no automatic push');
+   await context.close();
+  } finally {if(browser)await browser.close();vite.kill();await new Promise(r=>{if(vite.exitCode!==null)r();else vite.once('exit',r);});}
+ });
+});
