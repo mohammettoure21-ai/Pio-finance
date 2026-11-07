@@ -20,6 +20,14 @@ test('operator CLI bootstraps a private generated password file without printing
   const token=join(dir,'keys','holding.token');
   const granted=invoke('grant','--data-dir',data,'--agent','holding','--token-file',token);assert.equal(granted.status,0);assert.equal(existsSync(token),true);
   assert.ok(!(granted.stdout+granted.stderr).includes(readFileSync(token,'utf8').trim()));
+  const before=openStore(data);
+  before.transaction(s=>{s.sessions={synthetic:{csrf:'synthetic',expires:Date.now()+60000}};});
+  const agents=before.read().agents;before.close();
+  assert.equal(invoke('invalidate-sessions','--data-dir',data).status,0);
+  const after=openStore(data);
+  assert.deepEqual(after.read().sessions,{});
+  assert.deepEqual(after.read().agents,agents,'human session invalidation must preserve agent grants');
+  assert.equal(after.read().revision,0);after.close();
   assert.equal(invoke('revoke','--data-dir',data,'--agent','holding').status,0);
   assert.notEqual(invoke('serve','--data-dir',data,'--host','0.0.0.0').status,0);
   assert.notEqual(invoke('init','--data-dir',join(root,'private-test-denied'),'--password-file',join(dir,'never-created')).status,0);

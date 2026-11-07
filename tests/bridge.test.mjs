@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { once } from 'node:events';
 import { initialPortfolio } from '../src/finance/model.ts';
 import { tmpdir } from 'node:os';
+import { request as httpRequest } from 'node:http';
 
 const module = await import('../server/store.mjs').catch(() => ({}));
 test('private persistent store bootstraps only outside HTTP and never stores plaintext password', async () => {
@@ -27,6 +28,34 @@ test('private persistent store bootstraps only outside HTTP and never stores pla
 });
 
 const httpModule = await import('../server/http.mjs').catch(() => ({}));
+test('HTTPS proxy mode sets Secure cookies, keeps exact origin/Host/CSRF and rejects forwarded-header bypass', async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'pio-https-')),store=module.openStore(dir);
+ let server;
+ try {
+  store.init('synthetic-test-password-01');
+  for(const origin of ['http://pio.example','https://pio.example/','https://user:pass@pio.example','https://pio.example/path','https://pio.example?x=1'])
+   assert.throws(()=>httpModule.createBridge({store,origin}));
+  server=httpModule.createBridge({store,origin:'https://pio.example'});
+  server.listen(0,'127.0.0.1');await once(server,'listening');
+  const base=`http://127.0.0.1:${server.address().port}/api/pio`;
+  const login=async(extra={})=>fetch(base+'/session/login',{method:'POST',headers:{origin:'https://pio.example','content-type':'application/json',...extra},body:JSON.stringify({password:'synthetic-test-password-01'})});
+  assert.equal((await login({origin:'http://pio.example','x-forwarded-proto':'https','x-forwarded-host':'pio.example'})).status,403);
+  const wrongHostStatus=await new Promise((resolve,reject)=>{
+   const req=httpRequest(base+'/portfolio',{headers:{host:'pio.example'}},res=>{res.resume();res.on('end',()=>resolve(res.statusCode));});
+   req.on('error',reject);req.end();
+  });
+  assert.equal(wrongHostStatus,403,'proxy must set upstream loopback Host');
+  const r=await login();assert.equal(r.status,200);
+  assert.match(r.headers.get('set-cookie'),/; Secure;/);
+  const cookie=r.headers.get('set-cookie').split(';')[0],session=await r.json();
+  const logout=async(headers)=>fetch(base+'/session/logout',{method:'POST',headers:{origin:'https://pio.example','content-type':'application/json',cookie,...headers},body:'{}'});
+  assert.equal((await logout({})).status,403);
+  assert.equal((await logout({'x-pio-csrf':session.csrf,origin:'https://evil.example'})).status,403);
+  const out=await logout({'x-pio-csrf':session.csrf});assert.equal(out.status,200);
+  assert.match(out.headers.get('set-cookie'),/; Secure; Max-Age=0/);
+  assert.equal((await fetch(base+'/portfolio',{headers:{cookie}})).status,401);
+ }finally{if(server?.listening){server.closeAllConnections();await new Promise(r=>server.close(r));}store.close();rmSync(dir,{recursive:true,force:true});}
+});
 async function fixture(run) {
   const dir = mkdtempSync(join(tmpdir(), 'pio-http-'));
   const store = module.openStore(dir);

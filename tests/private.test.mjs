@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {mkdtempSync,rmSync,writeFileSync,statSync} from 'node:fs';
+import {mkdtempSync,rmSync,writeFileSync,statSync,chmodSync} from 'node:fs';
 import {tmpdir,userInfo} from 'node:os';
 import {join} from 'node:path';
 import {openStore,privateDirectory} from '../server/store.mjs';
@@ -24,6 +24,7 @@ test('private final credential and database files have verified user-only permis
    const file=join(dir,'keys','holding.token');grantAgent(store,'holding',[],file);security.assertPrivateFile(file);
    assert.match(readPrivateFile(file),/^[A-Za-z0-9_-]{43}$/);
    const unsafe=join(dir,'unsafe');writeFileSync(unsafe,'not-a-real-secret',{mode:0o644});
+   if(process.platform!=='win32')chmodSync(unsafe,0o644); // Exercise broad permissions regardless of the caller's umask.
    if(process.platform==='win32')execFileSync('icacls.exe',[unsafe,'/grant','*S-1-1-0:R'],{stdio:'pipe'});
    assert.throws(()=>security.assertPrivateFile(unsafe));
   } finally {store.close();}

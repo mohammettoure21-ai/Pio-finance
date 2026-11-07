@@ -1,0 +1,30 @@
+[Unit]
+Description=PIO Finance private bridge
+After=network.target
+
+[Service]
+Type=simple
+User=pio-service
+Group=pio-service
+WorkingDirectory=/srv/pio/current
+# Non-secret PIO_ORIGIN=https://your-approved-host goes in this required file.
+EnvironmentFile=/etc/pio-finance/origin.conf
+ExecStart=/opt/pio/runtime/node /srv/pio/current/server/cli.mjs serve --data-dir /var/lib/pio-finance/private
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/pio-finance/private
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

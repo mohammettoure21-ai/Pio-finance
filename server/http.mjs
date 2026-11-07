@@ -12,7 +12,12 @@ const cookieName = 'pio_owner';
 const sessionSeconds = 8 * 60 * 60;
 export function createBridge({store, origin = 'http://127.0.0.1:5173'}) {
   const expected = new URL(origin);
-  if (expected.origin !== origin || expected.protocol !== 'http:' || !['127.0.0.1','localhost'].includes(expected.hostname)) throw new Error('Only exact loopback development origins are supported');
+  const secure = expected.protocol === 'https:';
+  if (expected.origin !== origin || expected.username || expected.password ||
+      (!secure && (expected.protocol !== 'http:' || !['127.0.0.1','localhost'].includes(expected.hostname))))
+    throw new Error('Exact HTTPS origin or HTTP loopback development origin required');
+  // TLS terminates at the local reverse proxy. Never derive security from forwarded headers.
+  const cookiePolicy = `Path=/api/pio; HttpOnly; SameSite=Strict${secure ? '; Secure' : ''}`;
   const attempts = new Map();
   const server = createServer({maxHeaderSize: 16384, requestTimeout: 15000, headersTimeout: 10000}, async (req,res) => {
     res.setHeader('Content-Type','application/json; charset=utf-8');
@@ -59,7 +64,7 @@ export function createBridge({store, origin = 'http://127.0.0.1:5173'}) {
           for (const [key,value] of Object.entries(s.sessions)) if (value.expires < now) delete s.sessions[key];
           s.sessions[digest(token)]={csrf,expires:now+sessionSeconds*1000};
         });
-        res.setHeader('Set-Cookie',`${cookieName}=${token}; Path=/api/pio; HttpOnly; SameSite=Strict; Max-Age=${sessionSeconds}`);
+        res.setHeader('Set-Cookie',`${cookieName}=${token}; ${cookiePolicy}; Max-Age=${sessionSeconds}`);
         return send({role:'owner',csrf});
       }
       const state=store.read();
@@ -81,7 +86,7 @@ export function createBridge({store, origin = 'http://127.0.0.1:5173'}) {
       if (path === '/api/pio/session/logout' && method === 'POST') {
         if (actor.role !== 'owner') fail(403,'Owner required');
         store.transaction(s=>delete s.sessions[actor.session]);
-        res.setHeader('Set-Cookie',`${cookieName}=; Path=/api/pio; HttpOnly; SameSite=Strict; Max-Age=0`);
+        res.setHeader('Set-Cookie',`${cookieName}=; ${cookiePolicy}; Max-Age=0`);
         return send({ok:true});
       }
       if (actor.role === 'agent' && write && !(path==='/api/pio/proposals' && method==='POST')) fail(403,'Agents can only read and propose');

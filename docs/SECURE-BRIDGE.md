@@ -1,12 +1,18 @@
 # PIO Finance — pont privé local (première intégration)
 
+Le [dispositif de connexion proposé](CONNECTION-PLAN.md) détaille les prérequis
+serveur, les limites actuelles et la restauration, avant toute validation privée.
+Une sauvegarde navigateur illisible ou inaccessible bloque désormais l’interface
+et toutes les écritures : seul l’export du contenu brut lu et le rechargement sont
+proposés. Aucun portefeuille initial de remplacement n’est présenté comme le vôtre.
+
 **État : implémenté et testé localement sur données synthétiques, non déployé.** Aucun profil Hermes n’est modifié par ce dépôt, aucune sauvegarde personnelle n’a été lue ou envoyée. La mise en service et toute migration réelle demandent une validation séparée. Aucun fournisseur IA, WhatsApp, CRM ou service payant n’est appelé. Les robots sont visuels ; Hermès conserve ses règles locales et `ai: false`.
 
 ## Pré-requis et limites de confiance
 
 - Node **24 ou ultérieur**, avec `node:sqlite` et l’exécution des imports `.ts` natifs. API consultée : documentation officielle `https://nodejs.org/docs/latest-v24.x/api/sqlite.html` (`DatabaseSync`, `exec`, `prepare`, `get`, `run`). `node:sqlite` peut émettre un avertissement expérimental sur Node 24.
 - `npm ci --ignore-scripts --no-audit --no-fund`. Aucune nouvelle dépendance backend/MCP ; uniquement la bibliothèque standard Node.
-- Serveur **127.0.0.1 seulement**, HTTP local ; jamais exposer ces ports via tunnel/proxy public. La sécurité des données dépend aussi de votre compte OS, de votre navigateur personnel et du disque. SQLite et les sauvegardes métier ne sont **pas chiffrés au repos**.
+- Serveur **127.0.0.1 seulement**, HTTP local ; aucune exposition directe. Le mode HTTPS s’utilise uniquement derrière le proxy TLS local et l’accès privé approuvé (voir deploy/README.md). La sécurité des données dépend aussi de votre compte OS, de votre navigateur personnel et du disque. SQLite et les sauvegardes métier ne sont **pas chiffrés au repos**.
 - Windows : DACL utilisateur unique appliquée et relue via `icacls`. Un principal explicite inattendu entraîne un refus. POSIX : répertoire 0700, fichiers 0600 et propriétaire vérifiés. L’exécution ne nécessite pas d’administrateur.
 - Les permissions HTTP ne constituent **pas un sandbox OS**. Des profils sous le même compte Windows avec accès terminal/fichiers peuvent lire les mêmes fichiers. Ne donnez pas ces outils à un agent non fiable ; utilisez des comptes OS distincts pour une réelle isolation. Le connecteur n’expose aucune lecture arbitraire de fichier ni outil de confirmation.
 - Première version mono-propriétaire, stockage SQLite transactionnel d’un état JSON avec versions/idempotence. Pas de haute disponibilité, chiffrement disque, purge automatique, audit externe ni récupération automatique de mot de passe. Les versions consomment de l’espace ; surveiller la taille du répertoire privé et sauvegarder hors Git. Les administrateurs OS et processus du même utilisateur restent dans le périmètre de confiance.
@@ -56,7 +62,7 @@ Variables serveur facultatives (valeurs non secrètes) :
 
 - `PIO_DATA_DIR` : chemin absolu du répertoire privé ; défaut `%LOCALAPPDATA%/PIOFinance/private`, ou `~/.local/share/PIOFinance/private`.
 - `PIO_PORT` : défaut `8787` ; option CLI `--port`.
-- `PIO_ORIGIN` : défaut `http://127.0.0.1:5173` ; option CLI `--origin`. Seul un Origin HTTP loopback exact est accepté.
+- `PIO_ORIGIN` : défaut `http://127.0.0.1:5173` ; option CLI `--origin`. Un Origin HTTP loopback exact (développement) ou HTTPS exact (proxy TLS local) est accepté.
 - `PIO_DEV_API_PORT` : port du backend pour le proxy **Vite dev**, défaut `8787`. Pas de préfixe `VITE_`, aucun secret dans le bundle.
 
 Le backend refuse Host/Origin inattendus et ignore les en-têtes de proxy pour l’authentification. Pas de CORS permissif. Les requêtes JSON sont limitées à 2 Mio, en-têtes à 16 Kio, réception à 10 s et timeout HTTP à 15 s. Login limité à 20 tentatives par adresse locale / 10 minutes. Les journaux n’impriment ni corps métier, ni mots de passe, ni tokens.
@@ -64,7 +70,7 @@ Le backend refuse Host/Origin inattendus et ignore les en-têtes de proxy pour l
 ## Parcours humain volontaire
 
 1. La source reste `pio-finance-v1` dans le navigateur. Ouvrir « Connexion sécurisée » ne déclenche **aucune requête**.
-2. Se connecter avec le **mot de passe personnel**, jamais avec une clé de service. Le cookie est HttpOnly, SameSite=Strict, limité à `/api/pio`, durée 8 h. Pas de `Secure` car cette tranche utilise uniquement HTTP loopback ; HTTPS + cookie Secure seraient obligatoires avant toute exposition distante.
+2. Se connecter avec le **mot de passe personnel**, jamais avec une clé de service. Le cookie est HttpOnly, SameSite=Strict, limité à `/api/pio`, durée 8 h. Le cookie est Secure lorsque PIO_ORIGIN est HTTPS ; le mode HTTP loopback de développement reste sans Secure. Le proxy TLS doit conserver Origin et réécrire Host vers le loopback exact ; les en-têtes Forwarded ne servent pas à décider des droits.
 3. Cliquer **Lire le serveur**. Cette lecture ne téléverse aucune copie locale. Le login ne déclenche même pas cette lecture implicitement.
 4. Serveur vide : lire l’avertissement, cocher le consentement et cliquer **Initialiser le serveur vide**. Il faut `consent: true` et `expectedRevision: 0`. Un serveur déjà initialisé n’est jamais écrasé par cette route.
 5. **Push** partage explicitement toute la copie locale et exige consentement + confirmation du remplacement de la révision affichée. Le serveur conserve chaque version. Un conflit 409 n’écrase rien : relire, examiner les différences et choisir volontairement une nouvelle action. Il n’y a pas de fusion automatique.
@@ -150,3 +156,10 @@ npm run verify              # produit verification/results.json + TAP/build rée
 `PLAYWRIGHT_CHROMIUM_EXECUTABLE` peut désigner un Chromium local. Sinon le test préfère le Chromium Playwright installé, puis Chrome Windows standard. Si aucun n’est disponible, installer le navigateur de test (pas de profil personnel utilisé). `npm run test:secure-browser` utilise le port Vite **5173**, strict : libérer ce port avant le test. Les bases, mots de passe et tokens de test sont créés temporairement puis supprimés. Sous l’environnement Hermes Windows, fixer `TMPDIR`, `TMP` et `TEMP` au répertoire scratch Hermes avant les tests ; aucun fichier privé dans le dépôt.
 
 Les preuves générées donnent les comptes réellement parsés, commandes, versions Node et codes retour. Le test navigateur prouve l’absence d’appel API à l’ouverture, le login, le consentement, l’initialisation, la modification d’une proposition, la création unique de mission visible dans les données locales et la sauvegarde avant remplacement. Les tests HTTP couvrent CSRF/session, périmètres, révocation/rotation, idempotence, concurrence, versions et réouverture réelle SQLite. Cela ne constitue ni un audit sécurité indépendant, ni une validation de production, ni une exécution réelle des quatre profils métier.
+
+## Préparation de production
+
+Les modèles non activés et l’ordre d’exécution sont dans [deploy/README.md](../deploy/README.md).
+La commande opérateur `invalidate-sessions --data-dir <dossier-prive>` invalide
+toutes les sessions humaines sans toucher aux données ni aux clés agents ; utiliser
+en particulier avant remise en ligne d’une restauration, puis tourner les clés.

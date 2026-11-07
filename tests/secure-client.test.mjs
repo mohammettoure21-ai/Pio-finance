@@ -2,6 +2,26 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {initialPortfolio} from '../src/finance/model.ts';
 const m=await import('../src/finance/secure.ts').catch(()=>({}));
+test('failed or malformed reads never become an empty portfolio and never trigger writes',async()=>{
+ for(const scenario of ['network','unauthorized','invalid-json',{}, {revision:0}, {revision:1,portfolio:null}, {revision:0,portfolio:{}}, {revision:1,portfolio:{}}]){
+  const calls=[];
+  const client=m.createSecureClient(async(path,options)=>{
+   calls.push({path,method:options.method});
+   if(scenario==='network')throw new Error('offline');
+   return {ok:scenario!=='unauthorized',status:scenario==='unauthorized'?401:200,json:async()=>{
+    if(scenario==='invalid-json')throw new SyntaxError('Invalid JSON');
+    return scenario==='unauthorized'?{}:scenario;
+   }};
+  });
+  await assert.rejects(client.read());
+  assert.deepEqual(calls,[{path:'/api/pio/portfolio',method:'GET'}]);
+ }
+ const empty=m.createSecureClient(async()=>({ok:true,status:200,json:async()=>({revision:0,portfolio:null})}));
+ assert.deepEqual(await empty.read(),{revision:0,portfolio:null});
+ const portfolio=initialPortfolio();
+ const existing=m.createSecureClient(async()=>({ok:true,status:200,json:async()=>({revision:1,portfolio})}));
+ assert.deepEqual(await existing.read(),{revision:1,portfolio});
+});
 test('secure client does not contact server at construction and consent is required before sending local data',async()=> {
  assert.equal(typeof m.createSecureClient,'function','voluntary secure client missing');
  const calls=[]; const fetcher=async(path,options)=> {calls.push({path,options});return {ok:true,status:200,json:async()=>({csrf:'synthetic-csrf',role:'owner',revision:1})};};

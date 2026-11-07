@@ -799,21 +799,24 @@ function TaskEditor({
 }
 export default function App() {
   const [loaded] = useState(() => {
+    let raw: string | null = null;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      raw = localStorage.getItem(STORAGE_KEY);
       return {
         data: ensureWeeklyReport(
-          raw
+          raw !== null
             ? migratePortfolio(validatePortfolio(JSON.parse(raw)))
             : initialPortfolio(),
         ),
         error: "",
+        raw,
       };
     } catch {
       return {
         data: initialPortfolio(),
+        raw,
         error:
-          "La sauvegarde est illisible ou inaccessible. Elle n’a pas été remplacée. Exportez les données affichées avant toute modification.",
+          "La sauvegarde est illisible ou inaccessible. Son contenu n’a pas été remplacé. L’affichage du portefeuille et toute modification sont bloqués.",
       };
     }
   });
@@ -858,6 +861,7 @@ export default function App() {
   const late = data.tasks.filter((t) => !t.done && t.due && t.due < today());
   const pending = data.tasks.filter((t) => !t.done);
   function commit(next: Portfolio, track = true) {
+    if (loaded.error) throw new Error(loaded.error);
     next = track ? recordChanges(data, next) : ensureWeeklyReport(next);
     validatePortfolio(next);
     setData(next);
@@ -964,6 +968,24 @@ export default function App() {
       .filter((m) => m.amount && m.kind !== "Terminé")
       .map((m) => ({ ...m, company: c.name })),
   );
+  if (loaded.error) return (
+    <main className="app">
+      <section role="alert">
+        <h1>Sauvegarde locale protégée</h1>
+        <p>{loaded.error}</p>
+        <p>Conservez une copie du contenu brut avant toute réparation. Aucun portefeuille de remplacement n’est affiché ni envoyé à Hermès.</p>
+        {loaded.raw !== null ? <button onClick={() => {
+          const url = URL.createObjectURL(new Blob([loaded.raw!], { type: "application/octet-stream" }));
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "pio-finance-sauvegarde-brute.txt";
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }}>Exporter le contenu brut</button> : <p>Le stockage est inaccessible : aucun contenu brut n’a pu être lu.</p>}
+        <button onClick={() => window.location.reload()}>Réessayer la lecture</button>
+      </section>
+    </main>
+  );
   return (
     <div className="app">
       <aside className="rail">
@@ -1046,6 +1068,7 @@ export default function App() {
         </header>
         <main>
           <SecureConnection data={data} onReplace={(next) => {
+            if (loaded.error) throw new Error(loaded.error);
             validatePortfolio(next);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
             setData(next);

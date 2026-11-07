@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {existsSync} from 'node:fs';
+import {existsSync,readFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 import {agentFixture} from './bridge-fixture.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
@@ -55,6 +55,38 @@ test('browser opt-in: zero automatic API requests, personal login, consent uploa
    assert.equal(requests.filter(r=>r.url.endsWith('/portfolio/initialize') && r.method==='POST').length,1);
    assert.equal(requests.filter(r=>r.method==='PUT').length,0,'no automatic push');
    await context.close();
+   for (const raw of ['{synthetic-unreadable', '{"version":1}', '', null]) {
+    const blocked=await browser.newContext({reducedMotion:'reduce',acceptDownloads:true});
+    try {
+     await blocked.addInitScript(raw=>{
+      if(raw!==null)localStorage.setItem('pio-finance-v1',raw);
+      window.__storageWrites=0;
+      const write=Storage.prototype.setItem;
+      Storage.prototype.setItem=function(...args){window.__storageWrites++;return write.apply(this,args);};
+      if(raw===null)Storage.prototype.getItem=function(){throw new DOMException('Denied','SecurityError');};
+     },raw);
+     const locked=await blocked.newPage(),api=[];
+     locked.on('request',r=>{if(r.url().includes('/api/pio/'))api.push(r.url());});
+     await locked.clock.install();
+     await locked.goto('http://127.0.0.1:5173');
+     await locked.getByRole('heading',{name:'Sauvegarde locale protégée'}).waitFor();
+     assert.equal(await locked.getByText('Connexion sécurisée',{exact:true}).count(),0);
+     assert.equal(await locked.getByRole('button',{name:'Nouvelle tâche',exact:true}).count(),0);
+     assert.equal(await locked.locator('.world-robot, .entity').count(),0);
+     await locked.clock.fastForward(65000);
+     assert.equal(await locked.evaluate(()=>window.__storageWrites),0,'no initial or scheduled write');
+     if(raw!==null){
+      assert.equal(await locked.evaluate(()=>localStorage.getItem('pio-finance-v1')),raw);
+      const download=locked.waitForEvent('download');
+      await locked.getByRole('button',{name:'Exporter le contenu brut'}).click();
+      assert.equal(readFileSync(await (await download).path(),'utf8'),raw,'export original bytes, never fallback data');
+     } else assert.equal(await locked.getByRole('button',{name:'Exporter le contenu brut'}).count(),0);
+     await locked.getByRole('button',{name:'Réessayer la lecture'}).click();
+     await locked.getByRole('heading',{name:'Sauvegarde locale protégée'}).waitFor();
+     assert.equal(await locked.evaluate(()=>window.__storageWrites),0);
+     assert.deepEqual(api,[],'blocked storage must not contact bridge');
+    } finally {await blocked.close();}
+   }
   } finally {if(browser)await browser.close();vite.kill();await new Promise(r=>{if(vite.exitCode!==null)r();else vite.once('exit',r);});}
  });
 });

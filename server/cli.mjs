@@ -28,7 +28,7 @@ let store;
 try {
  if(Number(process.versions.node.split('.')[0])<24)throw new Error('Node 24 or later required');
  const [command,...args]=process.argv.slice(2),o=options(args);
- const allowed={init:['--password-file'],grant:['--agent','--companies','--token-file'],revoke:['--agent'],status:[],serve:['--port','--origin'],'export-version':['--revision','--output']};
+ const allowed={init:['--password-file'],grant:['--agent','--companies','--token-file'],revoke:['--agent'],status:[],serve:['--port','--origin'],'invalidate-sessions':[],'export-version':['--revision','--output']};
  if(!Object.hasOwn(allowed,command)||Object.keys(o).some(k=>k!=='--data-dir'&&!allowed[command].includes(k)))throw new Error('Unsupported command or option');
  const defaultDir=join(process.env.LOCALAPPDATA||join(homedir(),'.local','share'),'PIOFinance','private');
  const data=outsideRepo(o['--data-dir']||process.env.PIO_DATA_DIR||defaultDir);
@@ -49,6 +49,7 @@ try {
      grantAgent(store,o['--agent'],o['--companies']?o['--companies'].split(','):[],tokenFile);
      console.log('Agent credential assigned to private file. No token printed.');
    } else if(command==='revoke') {revokeAgent(store,o['--agent']);console.log('Agent revoked.');}
+   else if(command==='invalidate-sessions') {store.transaction(s=>{s.sessions={};});console.log('All owner sessions invalidated.');}
    else if(command==='status') {
      const s=store.read();console.log(JSON.stringify({revision:s.revision,companies:s.portfolio?.companies.map(c=>({id:c.id,name:c.name}))||[],agents:Object.keys(identities).map(id=>({id,color:identities[id],enabled:!!s.agents[id]&&!s.agents[id].revoked,companyIds:s.agents[id]?.companyIds||[]})),versions:s.versions.map(v=>({revision:v.revision,at:v.at}))},null,2));
    } else if(command==='export-version') {

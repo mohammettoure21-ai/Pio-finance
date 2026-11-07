@@ -41,7 +41,15 @@ export function createSecureClient(transport:typeof fetch=fetch) {
   async login(password:string) {const session=await request<{csrf:string;role:string}>('/session/login','POST',{password});csrf=session.csrf;return session;},
   async me(){const session=await request<{csrf:string;role:string}>('/session/me');csrf=session.csrf;return session;},
   async logout(){await request('/session/logout','POST',{});csrf='';},
-  read:()=>request<RemoteSnapshot>('/portfolio'),
+  async read():Promise<RemoteSnapshot> {
+   const snapshot=await request<RemoteSnapshot>('/portfolio');
+   if(!snapshot || !Number.isSafeInteger(snapshot.revision) || snapshot.revision<0 ||
+      !Object.hasOwn(snapshot,'portfolio') ||
+      (snapshot.portfolio===null ? snapshot.revision!==0 : snapshot.revision===0))
+    throw new Error('Lecture serveur invalide : aucun portefeuille vide présumé.');
+   if(snapshot.portfolio!==null)validatePortfolio(snapshot.portfolio);
+   return snapshot;
+  },
   proposals:()=>request<{proposals:ServerProposal[]}>('/proposals'),
   async initialize(portfolio:Portfolio,consent:boolean,expectedRevision:number) {
    if(!consent)throw new Error('Un consentement explicite est nécessaire.');
