@@ -13,6 +13,7 @@ ExecStart=/usr/bin/caddy run --config /etc/caddy/pio.Caddyfile --adapter caddyfi
 Restart=on-failure
 RestartSec=5
 Environment=HOME=/var/lib/caddy
+EnvironmentFile=/etc/pio-finance/proxy.env
 StateDirectory=caddy
 UMask=0077
 NoNewPrivileges=yes

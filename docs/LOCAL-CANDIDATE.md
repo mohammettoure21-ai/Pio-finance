@@ -1,5 +1,39 @@
 # Livraison locale intégrée — aucune publication/activation
 
+## État final du relais — remplace les anciens choix ci-dessous
+
+Le candidat inclut maintenant la fonction serveur Vercel `api/pio/[...path].js`
+et `server/vercel-proxy.mjs`. La décision n'est plus une réécriture externe
+statique : la fonction utilise `PIO_BACKEND_ORIGIN` HTTPS exact et `PIO_PROXY_KEY`
+dans l'environnement serveur. Elle relaie uniquement les routes métier reconnues,
+conserve cookies/Origin/CSRF, ignore les en-têtes arbitraires du client, refuse
+redirections, dépassement de 2 Mio et dépassement du délai. Aucun secret dans le
+bundle ou le navigateur. Caddy exige la même clé non vide et la retire avant le
+backend loopback. Voir deploy/proxy-environment.example.md.
+
+Les modèles Caddy/SSH sont inertes. Le backend retenu est l'unité SYSTÈME
+`pio-finance.service.example`, sans dépendance au user manager fabi/linger.
+Les variantes utilisateur et fragment de rewrite externe historiques ne doivent
+PAS être activés. Les deux modèles MCP sélectionnent seulement pio_read_context ;
+le code de proposition existant reste disponible mais non sélectionné initialement.
+
+Vérification finale réelle : 62 tests TAP passés, zéro échec/annulé/ignoré,
+TypeScript et build Vite réussis. Les six nouveaux tests proxy comprennent un
+vrai aller-retour TLS fixture vers le backend, les limites de taille, délai,
+refus de redirection et configuration manquante. Le test de taille a échoué
+avant correction (200 au lieu de 413). Voir verification/results.json et
+FINAL-EVIDENCE.json ; LOCAL-EVIDENCE.json décrit le jalon précédent à 56 tests,
+avec des empreintes de logs désormais historiques, non l'état final.
+
+Cela NE prouve PAS le bundling/routage réel Vercel du projet, le Caddy cible,
+son certificat public, le confinement des cinq runtimes, SSH nologin/commande
+forcée, le redémarrage serveur ni une sauvegarde réelle hors serveur. La capacité
+et les quotas du compte Vercel restent à vérifier sans achat. Le login applicatif
+via Vercel est accessible sur Internet, ce n'est pas un VPN. L'origine backend
+reste verrouillée par une clé distincte de tout accès Holding/propriétaire.
+
+
+
 ## Sources et périmètre
 
 - main/AZQAR : `457901275d68b73020edec1f60f7bb1265c7ccc1`.

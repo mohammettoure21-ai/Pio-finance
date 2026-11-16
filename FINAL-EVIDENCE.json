@@ -1,0 +1,448 @@
+{
+  "scope": "local synthetic only",
+  "verification": {
+    "startedAt": "2026-11-16T16:50:34.134Z",
+    "node": "v26.7.0",
+    "steps": [
+      {
+        "name": "unit-http-mcp",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "--test",
+          "--test-reporter=tap",
+          "tests/portfolio.test.mjs",
+          "tests/world.test.mjs",
+          "tests/suggestions.test.mjs",
+          "tests/azqar.test.mjs",
+          "tests/connection.test.mjs",
+          "tests/bridge.test.mjs",
+          "tests/authorization-race.test.mjs",
+          "tests/agents.test.mjs",
+          "tests/operator.test.mjs",
+          "tests/proposals.test.mjs",
+          "tests/concurrency.test.mjs",
+          "tests/secure-client.test.mjs",
+          "tests/private.test.mjs",
+          "tests/cli.test.mjs",
+          "tests/mcp.test.mjs",
+          "tests/persistence.test.mjs",
+          "tests/holding.test.mjs",
+          "tests/backup-restore.test.mjs",
+          "tests/https-proxy.test.mjs",
+          "tests/vercel-proxy.test.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 37330,
+        "counts": {
+          "tests": 56,
+          "pass": 56,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "name": "secure-browser",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "--test",
+          "--test-reporter=tap",
+          "tests/secure-browser.test.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 25625,
+        "counts": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "name": "main-azqar-browser",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "--test",
+          "--test-reporter=tap",
+          "tests/main-browser.test.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 105632,
+        "counts": {
+          "tests": 5,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "name": "typescript",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "node_modules/typescript/bin/tsc",
+          "-b"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 12510
+      },
+      {
+        "name": "vite-build",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "node_modules/vite/bin/vite.js",
+          "build"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 15161
+      }
+    ],
+    "status": "passed",
+    "finishedAt": "2026-11-16T16:53:50.415Z",
+    "testTotals": {
+      "tests": 62,
+      "pass": 62,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "productionDeployed": false,
+    "personalDataUsed": false
+  },
+  "independentlyParsedTotals": {
+    "tests": 62,
+    "pass": 62,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "testedCodeHashes": [
+    {
+      "path": "src/App.tsx",
+      "sha256": "515babf62ef811c6e284b87dc9870b5624f3025b639d45d09c37d93587adeb1b"
+    },
+    {
+      "path": "src/components/CampusRobot.tsx",
+      "sha256": "d6f8c4455163c77906f4d0142b9790a7d902ca58608c3eacf41b49057ecfd96e"
+    },
+    {
+      "path": "src/components/Character.tsx",
+      "sha256": "f2c09db4be1d0cb73d2dbbe2654e3c08a9a2b726cfedfcd2a330f499618aceda"
+    },
+    {
+      "path": "src/components/Dialog.tsx",
+      "sha256": "848b35a2488dfd35c14b9b4ae1dd6e8094afedd3f650c34d44702376c41c4ed5"
+    },
+    {
+      "path": "src/components/DomainCard.tsx",
+      "sha256": "62d00def950cf1c9e3104c369fb19260878fc6fd1096edafe57fc47fb1c83eab"
+    },
+    {
+      "path": "src/components/FinanceRobot.tsx",
+      "sha256": "05a3e77b7672468e2f050f9ef7cff00d32b92c174dd1191e61a6b53cba26a280"
+    },
+    {
+      "path": "src/components/GroupPresentation.tsx",
+      "sha256": "20aed9cd1fb6b36c8919d109b65b62e35435968492d8892c07f32e0c8b00a769"
+    },
+    {
+      "path": "src/components/HermesConnection.tsx",
+      "sha256": "2427da7b0c2c3528a3bfa3b425f406260abd89bb8a14e5daf6a35fcef1f48e07"
+    },
+    {
+      "path": "src/components/HermesSuggestions.tsx",
+      "sha256": "fd5a9a3dc3d8e970ad9387f58fdebaea623d10546a49dfce8075fd8618cec1fb"
+    },
+    {
+      "path": "src/components/robot3d.ts",
+      "sha256": "e2d5cefd2b3c06329f689f3d8ee0fbdb8feb27bee06fb898bb146bc1d1c2509c"
+    },
+    {
+      "path": "src/components/secure.css",
+      "sha256": "eef844e9fae31ed811073b44b29a5202ba65a12d23581cf7dfa66d76eafdb26f"
+    },
+    {
+      "path": "src/components/SecureConnection.tsx",
+      "sha256": "2bfc63f616a63a59bb0f3103c1af28dbd299cb0d1246718dfa5fa4a19191093a"
+    },
+    {
+      "path": "src/components/world.css",
+      "sha256": "ad7c3320abcf5a6ad7991ed6edd2eb60800ea0634794f20c52bae7de2865656e"
+    },
+    {
+      "path": "src/components/World.tsx",
+      "sha256": "13b9854932e0b9012e362d247b236afa981721020ed72c22f092ba5b4c76c226"
+    },
+    {
+      "path": "src/data/domains.ts",
+      "sha256": "70ef4b36510ba1d9f4a7cbde988748c3b82874ea664760ef47963391e7496cd6"
+    },
+    {
+      "path": "src/finance/azqar.ts",
+      "sha256": "506fb885a15e155442e82ea55191da2b33ec1fcbcaf36a2b7dc64301d1a0a029"
+    },
+    {
+      "path": "src/finance/connection.ts",
+      "sha256": "c794c21acc6f4d1f9a62a9f946651a45c6bebd3ad35bddfa9b4e7fa476055daa"
+    },
+    {
+      "path": "src/finance/integrations.ts",
+      "sha256": "bcffe4247b83634a984ebcc6d02a507124a3e22a7d32de66e6e3f76d85ee13b8"
+    },
+    {
+      "path": "src/finance/model.ts",
+      "sha256": "aaf2cfeeccb0b12ed13463c8d6096a772ba797e37dc197aa66f46b8c10a485bc"
+    },
+    {
+      "path": "src/finance/secure.ts",
+      "sha256": "d28854e506cc9d2d5b50dfea21e7c3e49ef40b47d37002c030a742f1ac794360"
+    },
+    {
+      "path": "src/finance/storage.ts",
+      "sha256": "4a9d30dc3df5f5ca82a0222301e5549aeaff9fb8d9948d95e89e50d82e609b11"
+    },
+    {
+      "path": "src/finance/suggestions.ts",
+      "sha256": "eb5c6f3dedc598f81180996f5b43fdb12539ea56f86583334e90ea4852c335e4"
+    },
+    {
+      "path": "src/finance/world.ts",
+      "sha256": "3cb643a3a756b4147544dcee79bc734df32042895d9353af0b5447806bb41080"
+    },
+    {
+      "path": "src/hooks/useStored.ts",
+      "sha256": "b069ccbb9ab7892cf0425bd2116e71149072ae2178c5beaaf3a25d7b82e9107d"
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "2b67e4fad46c8f360af5521d159d315f3835a6ed6bcef24da80fc93cce373195"
+    },
+    {
+      "path": "src/styles.css",
+      "sha256": "97442626327dbaadeafc5799b74c163b7216813fbaf9075d9b1b657d9c69c152"
+    },
+    {
+      "path": "server/cli.mjs",
+      "sha256": "e2047dc8a6d67333b0f2251c7641bde19660c2989894ebf1d10df543e16e9f70"
+    },
+    {
+      "path": "server/http.mjs",
+      "sha256": "3ca2141055632b49f03762da7d27b53e342e5bd15e83e9c6c09138e33d7aa459"
+    },
+    {
+      "path": "server/mcp.mjs",
+      "sha256": "e0b2b810e41d6bca19a9b643b5b5f75969f270b173b7d01f2dc2fe5977e9dc13"
+    },
+    {
+      "path": "server/operations.mjs",
+      "sha256": "91205db42d51cf8ca61e027bd56589371841a3b21bdbdb7c50070fa816975009"
+    },
+    {
+      "path": "server/operator.mjs",
+      "sha256": "9f4f49d4c80cb7cd8fbce94d08e0e43d693ebc08e4d674450e9dfdf249754224"
+    },
+    {
+      "path": "server/private.mjs",
+      "sha256": "b7932aead5d08c14a8ba7076cbe2a04932dc502a236b741c854ce703abdd4de8"
+    },
+    {
+      "path": "server/proposals.mjs",
+      "sha256": "9fa52190e797134138d6418fdcf0ba67bc018e7c548a392b7fd5d6bcc5b78e6b"
+    },
+    {
+      "path": "server/scopes.mjs",
+      "sha256": "57d08dadab752a9d6e6fdcd9257bdc32c09030fdca2867d19f88b9007e37a55a"
+    },
+    {
+      "path": "server/store.mjs",
+      "sha256": "79ff21740a56fc97d51b168f59dfcf9729229e76016f9f106821b2824b917f00"
+    },
+    {
+      "path": "server/vercel-proxy.mjs",
+      "sha256": "f53396a27591715eeb756aa2987241f255fe1203c7c603003e3dbc11a6f6b602"
+    },
+    {
+      "path": "tests/agents.test.mjs",
+      "sha256": "6c14d23f38c7f1771a1a79267dcfbe377ea34eb6fe9e1d2d81b92d17cf01646f"
+    },
+    {
+      "path": "tests/authorization-race.test.mjs",
+      "sha256": "2da91cb590151e363876997842553125f3a9d4b7ddcf24c2aaef22fcd2c4a3fb"
+    },
+    {
+      "path": "tests/azqar-browser.mjs",
+      "sha256": "af44f4e6cbd203c026b2c5a240d5fe10bc68f1f0ba0b6d7552324515dec8d0c0"
+    },
+    {
+      "path": "tests/azqar.test.mjs",
+      "sha256": "73e8c83a85220118d33746fdfbe36853d0ff9064392ec9e519a4bc858f05b7f0"
+    },
+    {
+      "path": "tests/backup-restore.test.mjs",
+      "sha256": "c55f9d443d19d4233af8b2b02d9a7edd442a70cb9fda66c6b0f3da651f2513fc"
+    },
+    {
+      "path": "tests/bridge-fixture.mjs",
+      "sha256": "6314ff0a3c99b53c26880cb5e05f3f2594fe80f7524df5ed7fe9692e2801548d"
+    },
+    {
+      "path": "tests/bridge.test.mjs",
+      "sha256": "304171240a2a9402fbdcda8781c0be143bb503ffbed08e8a10d11b991ed587bb"
+    },
+    {
+      "path": "tests/browser-smoke.cjs",
+      "sha256": "7f13cebfb13160c77e62b651e1dabf3f27c95b45960f110d7442242b82670d5c"
+    },
+    {
+      "path": "tests/cli.test.mjs",
+      "sha256": "e1b849755134fb5904d9dd131e9a38eaa402be18e217f48b7e823913b426b208"
+    },
+    {
+      "path": "tests/concurrency.test.mjs",
+      "sha256": "b8240663c504506e0a0f7fff99220551d1379bdf50e6f4030a65f90b6d86da0d"
+    },
+    {
+      "path": "tests/connection-browser.mjs",
+      "sha256": "1e7cb1c536af75ec9d498cd9c5641d9133db179a251a449df294618b94920ae0"
+    },
+    {
+      "path": "tests/connection.test.mjs",
+      "sha256": "38d9cdd835c76d53b25b1916a1c1c853f8df024f79fb6f9e760838aefca09611"
+    },
+    {
+      "path": "tests/holding.test.mjs",
+      "sha256": "91cdbda62643d68b267d416c61ccda8f76806b3301ba02b4ac0b26640e5b1312"
+    },
+    {
+      "path": "tests/https-proxy.test.mjs",
+      "sha256": "c2308558551509a393781c2d195a475f5dd1aee95763d31cc321b8f18d438046"
+    },
+    {
+      "path": "tests/main-browser.test.mjs",
+      "sha256": "882b136bf23ba724d4b874ff09cebaebd90f8b11b67e4d1ef4cef3af741a8040"
+    },
+    {
+      "path": "tests/mcp.test.mjs",
+      "sha256": "bb9eaddf13b22d5d6e60183aa031229242fe4270a0d30db22e33ca9ebe86cdd4"
+    },
+    {
+      "path": "tests/operator.test.mjs",
+      "sha256": "8a7674b123e006f15db3462837acbee1a2c55416789164b661100134c998018b"
+    },
+    {
+      "path": "tests/persistence.test.mjs",
+      "sha256": "33c435b0fc7307eed326a543ccb3bb8808c4385fb0ab273ce0d9cb4a744b1385"
+    },
+    {
+      "path": "tests/portfolio.test.mjs",
+      "sha256": "ed9d953bc0f1a29ccf519a3c470e4bba16ec0c1f265ea57bea296db58ff976cb"
+    },
+    {
+      "path": "tests/private.test.mjs",
+      "sha256": "b199577f8e3434fb21d9a98bc1eb4ad9245a79aeae2efa41f302e1188fb27769"
+    },
+    {
+      "path": "tests/proposals.test.mjs",
+      "sha256": "4e33660e4dc8245508a63254d1e8b189ca9c2e9a15c54c83484fa125d1ca02c5"
+    },
+    {
+      "path": "tests/secure-browser.test.mjs",
+      "sha256": "5e82aefbdb833dd659eb0bef7b485a85c464e9114ef14dbafc137e53a479aed6"
+    },
+    {
+      "path": "tests/secure-client.test.mjs",
+      "sha256": "6b18b8b291cb2839f56cb013effc01fcf7b451f1fa4801500d01c2ef37f71c63"
+    },
+    {
+      "path": "tests/suggestions.test.mjs",
+      "sha256": "1e7e5f76f2cfeb1391c66a9030c22672a261937ebd56317b3f0a5f751a875531"
+    },
+    {
+      "path": "tests/vercel-proxy.test.mjs",
+      "sha256": "ea4396a4eaf6216131d065d20ccadc532ec042746e2375946095a37b9c83bfc2"
+    },
+    {
+      "path": "tests/world-browser.cjs",
+      "sha256": "8a2184b14a3391c5f85161b7302d3da225f3f5aa17414a495102b0c3d421e1b9"
+    },
+    {
+      "path": "tests/world.test.mjs",
+      "sha256": "dff275285d090474a9ebe3c59f0a59491d811a0dffad4a6888f0b60ba4169c43"
+    },
+    {
+      "path": "api/pio/[...path].js",
+      "sha256": "3338d0f6248e74ecf74e7655aa9d1c4dae7d275a16335e01f8231cda1fe0a60e"
+    },
+    {
+      "path": "scripts/verify.mjs",
+      "sha256": "61c0858fa0102cd6a4532cbe1e500ab2cf49e41419b554b544a784f9c00e4e46"
+    }
+  ],
+  "logHashes": [
+    {
+      "path": "verification/unit-http-mcp.stdout.log",
+      "sha256": "3cd2ad1b560c9a4a2bc45683d20139bdf71855788e22e380e581095cb8b20c89"
+    },
+    {
+      "path": "verification/unit-http-mcp.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification/secure-browser.stdout.log",
+      "sha256": "54759e9bbf36a9b34a9f325ec58b72ef45ffa983614efa692de6bc2788f0a1aa"
+    },
+    {
+      "path": "verification/secure-browser.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification/main-azqar-browser.stdout.log",
+      "sha256": "99b36ed3c069a7ed0a83665ba77adc2c2b35c09cf2699fdebaf373bf082e9e8c"
+    },
+    {
+      "path": "verification/main-azqar-browser.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification/typescript.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification/typescript.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "verification/vite-build.stdout.log",
+      "sha256": "dc3b75f91f3223e39f6c5765390fd660204112d1d43fba5065f7a16109edeca3"
+    },
+    {
+      "path": "verification/vite-build.stderr.log",
+      "sha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c"
+    }
+  ],
+  "sources": {
+    "main": "457901275d68b73020edec1f60f7bb1265c7ccc1",
+    "bridge": "22d8d8200ec09fa2c340e111d254bfd7f0de8a5b"
+  },
+  "supersedes": "LOCAL-EVIDENCE.json logs and test totals",
+  "productionDeployed": false,
+  "realPortfolioRead": false,
+  "profileChanges": false,
+  "productionCredentialsCreated": false,
+  "limits": [
+    "No public TLS/Vercel/Caddy proof",
+    "No target service startup/reboot proof",
+    "No actual all-tools role isolation proof",
+    "No actual off-server backup or independent recovery key copy",
+    "No MCP registration or authenticated owner portfolio read"
+  ]
+}

@@ -2,11 +2,11 @@
   "mcp_servers": {
     "pio_finance": {
       "command": "C:/Windows/System32/OpenSSH/ssh.exe",
-      "args": ["-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "IdentitiesOnly=yes", "-o", "ClearAllForwardings=yes", "-o", "UserKnownHostsFile=C:/PRIVATE-PIO/ssh/known_hosts", "-i", "C:/PRIVATE-PIO/ssh/holding_mcp", "pio-holding@2.29.156.0"],
+      "args": ["-T", "-o", "ConnectTimeout=8", "-o", "ConnectionAttempts=1", "-o", "UpdateHostKeys=no", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "IdentitiesOnly=yes", "-o", "ClearAllForwardings=yes", "-o", "UserKnownHostsFile=C:/PRIVATE-PIO/ssh/known_hosts", "-i", "C:/PRIVATE-PIO/ssh/holding_mcp", "pio-holding@2.29.156.0"],
       "timeout": 30,
       "connect_timeout": 15,
       "sampling": { "enabled": false },
-      "tools": { "include": ["pio_read_context", "pio_propose_mission"] }
+      "tools": { "include": ["pio_read_context"] }
     }
   }
 }

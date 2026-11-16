@@ -1,5 +1,5 @@
 # MODELE INERTE NON ACTIVE. Pas de clé/certificat réels dans ce fichier.
-# Bloqué par défaut: TEST-NET-1 n'est PAS une adresse de sortie Vercel approuvée.
+# Cle serveur uniquement : PIO_PROXY_KEY chargee depuis EnvironmentFile prive.
 # Ne pas enlever le contrôle d'accès sans validation distincte de l'exposition.
 {
     admin off
@@ -7,21 +7,25 @@
 2-29-156-0.sslip.io {
     @api path /api/pio/*
     handle @api {
-        # A remplacer uniquement par un contrôle privé/proxy réellement vérifié.
-        @approved remote_ip 192.0.2.1/32
+        # Cle absente/vide : les deux matchers ne peuvent pas reussir ensemble.
+        @approved {
+            header X-PIO-Proxy-Key "{$PIO_PROXY_KEY}"
+            header_regexp proxy_key X-PIO-Proxy-Key ^[A-Za-z0-9_-]{43,128}$
+        }
         handle @approved {
             request_body {
                 max_size 2MB
             }
             reverse_proxy 127.0.0.1:8787 {
                 header_up Host 127.0.0.1:8787
+                header_up -X-PIO-Proxy-Key
                 header_up -Forwarded
                 header_up -X-Forwarded-Host
                 header_up -X-Forwarded-Proto
             }
         }
         handle {
-            respond "PIO access not activated" 403
+            respond "PIO access denied" 403
         }
     }
     handle {
