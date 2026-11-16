@@ -7,10 +7,11 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "node tests/portfolio.test.mjs && node tests/world.test.mjs && node tests/suggestions.test.mjs && node tests/azqar.test.mjs",
+    "test": "node tests/portfolio.test.mjs && node tests/world.test.mjs && node tests/suggestions.test.mjs && node tests/azqar.test.mjs && node --test tests/secure-client.test.mjs tests/connection.test.mjs",
     "test:e2e": "node tests/browser-smoke.cjs",
     "test:world": "node tests/world-browser.cjs",
-    "test:azqar": "node tests/azqar-browser.mjs"
+    "test:azqar": "node tests/azqar-browser.mjs",
+    "test:connection": "node tests/connection-browser.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

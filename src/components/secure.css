@@ -1,0 +1,18 @@
+.secure-connection { margin: 0 0 20px; padding: 12px 16px; border: 1px solid #333; border-radius: 12px; font-size: .85rem; }
+.secure-connection summary { cursor: pointer; font-weight: 600; }
+.secure-connection p { line-height: 1.6; overflow-wrap: anywhere; }
+.secure-connection form { display: grid; gap: 10px; max-width: 650px; }
+.secure-connection label:not(.secure-consent) { display: grid; gap: 5px; }
+.secure-connection input:not([type="checkbox"]), .secure-connection select { width: 100%; padding: 9px; border: 1px solid #555; border-radius: 6px; background: #151515; color: white; }
+.secure-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.secure-consent { display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+.secure-proposal { border-top: 1px solid #444; margin-top: 16px; padding-top: 8px; }
+.secure-connection button:disabled { opacity: .45; cursor: not-allowed; }
+.hermes-setup > p, .hermes-setup li p { font-size: 13px; color: #aaa; line-height: 1.7; }
+.hermes-setup ol { padding-left: 22px; display: grid; gap: 15px; }
+.hermes-setup li { padding-left: 5px; }
+.hermes-setup li strong { font-size: 14px; }
+.hermes-setup li p { margin: 5px 0; }
+.hermes-setup [role="status"] { font-size: 13px; line-height: 1.7; }
+.connect-hermes { display: inline-flex; align-items: center; gap: 7px; }
+@media (max-width: 700px) { .connect-hermes span { display: none; } .connect-hermes { padding: 8px; min-width: 32px; } }

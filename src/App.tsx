@@ -1,3 +1,4 @@
+import HermesConnection from "./components/HermesConnection";
 import { loadPortfolio, AZQAR_BACKUP_KEY } from "./finance/storage";
 import { applyAzqarProfile } from "./finance/azqar";
 import GroupPresentation from "./components/GroupPresentation";
@@ -817,6 +818,7 @@ export default function App() {
   const [selected, setSelected] = useState<string | null>(null);
   const [task, setTask] = useState<Task | null>(null);
   const [pio, setPio] = useState(false);
+  const [connectHermes, setConnectHermes] = useState(false);
   const [noteCompany, setNoteCompany] = useState(
     loaded.data.companies[0]?.id ?? "",
   );
@@ -1042,6 +1044,9 @@ export default function App() {
             <small>CONVICTION. VISION. PÉRENNITÉ.</small>
           </a>
           <div className="top-actions">
+            <button className="secondary connect-hermes" aria-label="Connecter Hermès" onClick={() => setConnectHermes(true)}>
+              <Sparkles size={16} /><span>Connecter Hermès</span>
+            </button>
             <span className="private">
               <ShieldCheck size={14} /> Espace privé · local
             </span>
@@ -1699,6 +1704,17 @@ export default function App() {
           }}
         />
       )}
+      {connectHermes && <Modal title="Connecter Hermès" close={() => setConnectHermes(false)}>
+        <HermesConnection data={data} onReplace={(next) => {
+          if (loaded.error) throw new Error(loaded.error);
+          validatePortfolio(next);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+          setData(next);
+          setStorageError("");
+          setWorldEpoch((epoch) => epoch + 1);
+          setSelected(null);
+        }} />
+      </Modal>}
       {holding && (
         <Modal title="Votre future holding" close={() => setHolding(false)}>
           <p className="notice">

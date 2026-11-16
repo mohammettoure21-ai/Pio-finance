@@ -1,5 +1,28 @@
 # AZQAR Holdings · PIO Finance
 
+## Connexion guidée à Hermès
+
+Le bouton « Connecter Hermès » ouvre un parcours en trois étapes : vérifier le
+service, s’identifier, puis examiner et autoriser le partage. Aucun appel API à
+l’ouverture ; la vérification explicite utilise seulement GET /api/pio/session/me.
+Sans service compatible, aucun mot de passe n’est demandé et aucune connexion
+n’est annoncée. Une session propriétaire ne prouve pas l’inscription MCP des agents.
+
+Le client et l’interface de partage réutilisent le travail existant de la branche
+feat/hermes-holding-bridge, avec validation de la session propriétaire et refus des
+redirections. Les sauvegardes, confirmations, révisions et propositions sont
+conservées. Aucun partage automatique, aucune URL externe ni clé dans le navigateur.
+
+Cette publication ne déploie **aucun backend**, ne configure aucun profil Hermès
+et ne connecte pas les données réelles. Le service authentifié doit être installé
+et relié au même domaine sur /api/pio avant utilisation. Sa mise en production,
+les périmètres MCP et les sauvegardes restent à valider séparément selon le dispositif
+existant. Le site Vercel statique seul ne peut pas exécuter le service Node/SQLite.
+
+Vérification : `npm test`, `npm run build` et `npm run test:connection` (Vite sur
+127.0.0.1:5173, Chromium). Le navigateur de test intercepte les routes avec des
+réponses synthétiques : il ne prouve pas une connexion à un service déployé.
+
 ## Mise à jour AZQAR
 
 L’accueil présente désormais le projet AZQAR Holdings : siège envisagé à Dakar,
