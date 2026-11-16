@@ -1,3 +1,6 @@
+import { loadPortfolio, AZQAR_BACKUP_KEY } from "./finance/storage";
+import { applyAzqarProfile } from "./finance/azqar";
+import GroupPresentation from "./components/GroupPresentation";
 import HermesSuggestions from "./components/HermesSuggestions";
 import World from "./components/World";
 import { ensureWeeklyReport, recordChanges, robotState } from "./finance/world";
@@ -798,28 +801,16 @@ function TaskEditor({
 }
 export default function App() {
   const [loaded] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return {
-        data: ensureWeeklyReport(
-          raw
-            ? migratePortfolio(validatePortfolio(JSON.parse(raw)))
-            : initialPortfolio(),
-        ),
-        error: "",
-      };
-    } catch {
-      return {
-        data: initialPortfolio(),
-        error:
-          "La sauvegarde est illisible ou inaccessible. Elle n’a pas été remplacée. Exportez les données affichées avant toute modification.",
-      };
-    }
+    const result = loadPortfolio({
+      getItem: (key) => localStorage.getItem(key),
+      setItem: (key, value) => localStorage.setItem(key, value),
+    });
+    return { data: result.data ?? initialPortfolio(), error: result.error };
   });
   const [data, setData] = useState<Portfolio>(loaded.data);
   const [storageError, setStorageError] = useState(loaded.error);
   const [target, setTarget] = useState(true);
-  const [page, setPage] = useState("world");
+  const [page, setPage] = useState("group");
   const [worldEpoch, setWorldEpoch] = useState(0);
   const [taskCompany, setTaskCompany] = useState("");
   const [taskState, setTaskState] = useState("open");
@@ -857,16 +848,19 @@ export default function App() {
   const late = data.tasks.filter((t) => !t.done && t.due && t.due < today());
   const pending = data.tasks.filter((t) => !t.done);
   function commit(next: Portfolio, track = true) {
+    if (loaded.error) return false;
     next = track ? recordChanges(data, next) : ensureWeeklyReport(next);
     validatePortfolio(next);
-    setData(next);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      setData(next);
       setStorageError("");
+      return true;
     } catch {
       setStorageError(
-        "Sauvegarde locale indisponible. Exportez vos données avant de quitter cette page.",
+        "Modification non enregistrée : sauvegarde locale indisponible. Exportez vos données avant de quitter cette page.",
       );
+      return false;
     }
   }
   useEffect(() => {
@@ -909,6 +903,7 @@ export default function App() {
     });
   }
   function exportData() {
+    if (loaded.error) return;
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
@@ -919,20 +914,38 @@ export default function App() {
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+  function exportOriginalBackup() {
+    try {
+      const raw = localStorage.getItem(AZQAR_BACKUP_KEY);
+      if (raw === null) { setMessage("Aucune sauvegarde antérieure à la mise à jour AZQAR sur cet appareil."); return; }
+      const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "pio-finance-avant-azqar.json";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch { setMessage("La copie de sécurité est inaccessible."); }
+  }
   async function importData(f?: File) {
     if (!f) return;
     try {
       if (f.size > 5_000_000)
         throw new Error("Fichier trop volumineux (5 Mo maximum).");
-      const next = migratePortfolio(
+      const next = applyAzqarProfile(migratePortfolio(
         validatePortfolio(JSON.parse(await f.text())),
-      );
+      ));
       if (
         confirm(
           `Remplacer vos données locales par ${next.companies.length} entreprises et ${next.tasks.length} tâches ? Exportez d’abord votre sauvegarde si nécessaire.`,
         )
       ) {
-        commit(next, false);
+        const previous = localStorage.getItem(STORAGE_KEY);
+        if (previous !== null) {
+          const backupKey = `${STORAGE_KEY}-before-import`;
+          localStorage.setItem(backupKey, previous);
+          if (localStorage.getItem(backupKey) !== previous) throw new Error("La sauvegarde avant import n’a pas pu être vérifiée.");
+        }
+        if (!commit(next, false)) { setMessage("Import non enregistré : sauvegarde locale indisponible."); return; }
         setWorldEpoch((epoch) => epoch + 1);
         setSelected(null);
         setMessage("Sauvegarde importée.");
@@ -963,6 +976,15 @@ export default function App() {
       .filter((m) => m.amount && m.kind !== "Terminé")
       .map((m) => ({ ...m, company: c.name })),
   );
+  if (loaded.error) return (
+    <main className="recovery" role="alert">
+      <ShieldCheck size={30} />
+      <h1>Portefeuille inaccessible</h1>
+      <p>{loaded.error}</p>
+      <p>Les modifications et l’import sont bloqués pour protéger vos données. Ne supprimez pas les données du navigateur.</p>
+      <button className="primary" onClick={() => window.location.reload()}>Réessayer la lecture</button>
+    </main>
+  );
   return (
     <div className="app">
       <aside className="rail">
@@ -978,6 +1000,9 @@ export default function App() {
           </span>
         </a>
         <div className="rail-nav">
+          <button className={page === "group" ? "active" : ""} aria-label="Présentation du groupe" onClick={() => setPage("group")}>
+            <Layers3 size={21} />
+          </button>
           <button
             className={page === "world" ? "active" : ""}
             aria-label="Mon monde"
@@ -1012,9 +1037,9 @@ export default function App() {
       </aside>
       <div className="workspace">
         <header className="topbar">
-          <a className="wordmark" href="#" onClick={() => setPage("world")}>
-            PIO <span>×</span> Finance
-            <small>VOTRE VISION. VOTRE PATRIMOINE.</small>
+          <a className="wordmark" href="#" onClick={() => setPage("group")}>
+            AZQAR <span>·</span> HOLDINGS
+            <small>CONVICTION. VISION. PÉRENNITÉ.</small>
           </a>
           <div className="top-actions">
             <span className="private">
@@ -1048,14 +1073,14 @@ export default function App() {
             <div>
               <span className="eyebrow">L’AMBITION PREND FORME</span>
               <h1>
-                {page === "world"
+                {page === "group" ? data.holdingName : page === "world"
                   ? "Bienvenue dans votre monde."
                   : page === "map"
                     ? "Une vision d’ensemble."
                     : "Tâches des entreprises"}
               </h1>
               <p>
-                {page === "world"
+                {page === "group" ? "Groupe privé d’investissement et de développement d’entreprises" : page === "world"
                   ? "Vos sociétés vivent au rythme de vos actions."
                   : page === "map"
                     ? "Vos entreprises, leurs liens, votre prochaine étape."
@@ -1090,7 +1115,7 @@ export default function App() {
               </button>
             </div>
           )}
-          {page === "world" ? (
+          {page === "group" ? <GroupPresentation data={data} onEdit={setSelected} onMap={() => setPage("map")} /> : page === "world" ? (
             <World
               key={worldEpoch}
               data={data}
@@ -1327,7 +1352,7 @@ export default function App() {
                           {n.id === "holding" || n.company ? (
                             <FinanceRobot
                               name={
-                                n.id === "holding" ? "FABI Holding" : n.name
+                                n.id === "holding" ? data.holdingName : n.name
                               }
                             />
                           ) : (
@@ -1600,6 +1625,7 @@ export default function App() {
                 : "Sauvegardé sur cet appareil"}
             </span>
             <span>Données locales · Exportez régulièrement une sauvegarde</span>
+            <button onClick={exportOriginalBackup}>Sauvegarde avant AZQAR</button>
             <span>
               PIO × Finance <b>V2.0</b>
             </span>

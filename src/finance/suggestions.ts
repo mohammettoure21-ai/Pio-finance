@@ -96,13 +96,13 @@ export function suggestTasks(
         "Planifier les interventions de la semaine",
         `Préparer le point conciergerie pour ${parent}`,
       ]
-    : key.includes("immobilier")
+    : (key.includes("immobilier") || key.includes("immo"))
       ? [
           "Faire le point sur les projets et biens à suivre",
           "Mettre à jour les échéances des dossiers immobiliers",
           `Préparer le point immobilier pour ${parent}`,
         ]
-      : key.includes("afrodemy")
+      : (key.includes("afrodemy") || key.includes("afrogroup"))
         ? [
             "Définir le prochain contenu de formation",
             "Faire le point sur les retours des apprenants",

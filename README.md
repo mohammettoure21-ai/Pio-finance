@@ -1,4 +1,34 @@
-# PIO × Finance
+# AZQAR Holdings · PIO Finance
+
+## Mise à jour AZQAR
+
+L’accueil présente désormais le projet AZQAR Holdings : siège envisagé à Dakar,
+zone cible Sénégal et Afrique, mission, vision et structure en trois axes.
+La palette existante du site est conservée.
+
+- Pôle entreprises : FABI IMMO, FABI CONCIERGERIE et PROCOLORE.
+- Participations stratégiques : MBTG et AFROGROUP SAS. Afrodemy est présentée
+  comme une application d’Afrogroup, sans créer une participation distincte.
+- Portefeuille d’investissement envisagé : BRVM, actions, crypto, épargne,
+  placements et liquidités. Aucun solde ni position n’est inventé.
+
+Dans Mon monde, AZQAR Holdings remplace le nom par défaut FABI Holding.
+Procolore possède un espace et un robot bleus ; les autres couleurs sont conservées.
+Les profils d’agents distants et WhatsApp ne sont pas modifiés.
+
+Au premier chargement d’un ancien portefeuille valide, la sauvegarde brute est
+copiée et relue sous `pio-finance-v1-before-azqar` avant la mise à jour.
+Le bouton « Sauvegarde avant AZQAR » télécharge cette copie originale pour
+restauration par l’import habituel. Une erreur de lecture ou de sauvegarde bloque
+l’interface et laisse la clé originale intacte. Aucun export privé n’est transmis.
+
+La mise à jour conserve les identifiants, tâches, notes, historiques financiers,
+liens actuels, participations et visions personnalisées. Les anciens noms connus
+sont actualisés et Procolore est ajouté une seule fois. Les suppressions et
+renommages ultérieurs sont conservés. Les taux personnels restent dans les fiches
+locales : ils ne sont pas ajoutés aux valeurs publiques du code. Aucun transfert
+juridique à la holding n’est présumé. Les sections suivantes décrivent aussi les
+étapes historiques du prototype.
 
 Carte interactive pour suivre ses entreprises et préparer une future holding. React 19, TypeScript et Vite. Aucun backend ni service externe connecté.
 

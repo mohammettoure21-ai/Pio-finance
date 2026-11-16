@@ -86,6 +86,7 @@ export type Company = {
   };
 };
 export type Portfolio = {
+  azqarRevision?: 1;
   vision?: string;
   world?: WorldHistory;
   version: 1;
@@ -303,6 +304,7 @@ export function validatePortfolio(raw: unknown): Portfolio {
   if (!raw || typeof raw !== "object") throw new Error("Format JSON invalide.");
   const data = raw as Portfolio;
   validateWorld(data.world);
+  if (data.azqarRevision !== undefined && data.azqarRevision !== 1) throw new Error("Version AZQAR invalide.");
   if (
     data.vision !== undefined &&
     (typeof data.vision !== "string" || data.vision.length > 10000)

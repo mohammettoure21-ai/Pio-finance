@@ -22,11 +22,11 @@ const out = (name) => path.join(output, name);
   await page.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Carte des participations", exact: true }).click();
   await page.getByRole("heading", { name: "Une vision d’ensemble." }).waitFor();
-  assert.equal(await page.locator(".entity").count(), 5);
-  assert.equal(await page.locator(".finance-robot").count(), 5);
-  assert.equal(await page.locator(".overview > div").first().locator("strong").textContent(), "3");
-  const immobilier = await page.locator(".entity").filter({ hasText: "FABI Immobilier" }).boundingBox();
-  const concierge = await page.locator(".entity").filter({ hasText: "FABI Conciergerie" }).boundingBox();
+  assert.equal(await page.locator(".entity").count(), 6);
+  assert.equal(await page.locator(".finance-robot").count(), 6);
+  assert.equal(await page.locator(".overview > div").first().locator("strong").textContent(), "4");
+  const immobilier = await page.locator(".entity").filter({ hasText: "FABI IMMO" }).boundingBox();
+  const concierge = await page.locator(".entity").filter({ hasText: "FABI CONCIERGERIE" }).boundingBox();
   assert.ok(concierge.y > immobilier.y);
   assert.equal(concierge.x, immobilier.x);
   const graphStyle = await page.locator(".graph").getAttribute("style");
@@ -37,7 +37,7 @@ const out = (name) => path.join(output, name);
   await page.emulateMedia({ reducedMotion: "reduce" });
   assert.equal(await page.locator(".ownership-link").first().evaluate(el => getComputedStyle(el).animationName), "none");
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  console.log("PASS five robots, three poles, nested concierge, stationary tree and reduced motion");
+  console.log("PASS six company illustrations, four target branches, nested concierge, stationary tree and reduced motion");
 
   await page
     .getByRole("button", { name: "Portefeuille actuel", exact: true })
@@ -51,7 +51,7 @@ const out = (name) => path.join(output, name);
   await page.getByLabel("Devise (ex. EUR, XOF)").fill("EUR");
   await page.getByRole("tab", { name: "Participation", exact: true }).click();
   let owner = page.getByLabel("Entreprise détentrice actuelle");
-  await owner.selectOption({ label: "FABI Immobilier" });
+  await owner.selectOption({ label: "FABI IMMO" });
   await page.getByLabel("Participation du détenteur (%)").fill("35");
   await page.getByLabel("Détenteur envisagé").selectOption("holding");
   await page.getByLabel("Participation envisagée (%)").fill("40");
@@ -59,7 +59,7 @@ const out = (name) => path.join(output, name);
   await page.locator(".entity").filter({ hasText: "Atelier test" }).waitFor();
   assert.equal(await page.locator(".graph>svg > path").count(), 1);
   console.log("PASS add, edit, status, actual ownership");
-  await page.locator(".entity").filter({ hasText: "FABI Immobilier" }).click();
+  await page.locator(".entity").filter({ hasText: "FABI IMMO" }).click();
   await page.getByRole("tab", { name: "Participation", exact: true }).click();
   await page
     .getByLabel("Entreprise détentrice actuelle")
@@ -79,7 +79,7 @@ const out = (name) => path.join(output, name);
       "Structure cible — holding en préparation",
     ),
   );
-  assert.equal(await page.locator(".graph>svg > path").count(), 5);
+  assert.equal(await page.locator(".graph>svg > path").count(), 6);
   assert.equal(await page.locator(".entity.holding").count(), 1);
   await page.locator(".entity.holding").click();
   await page.getByLabel("Nom envisagé").fill("Holding test");
@@ -139,7 +139,7 @@ const out = (name) => path.join(output, name);
   const exported = JSON.parse(
     require("fs").readFileSync(out("export.json"), "utf8"),
   );
-  assert.equal(exported.companies.length, 5);
+  assert.equal(exported.companies.length, 6);
   assert.equal(exported.tasks.length, 1);
   await page.locator("input[type=file]").setInputFiles({
     name: "invalid.json",
@@ -167,13 +167,13 @@ const out = (name) => path.join(output, name);
   await page
     .getByRole("button", { name: "Supprimer l’entreprise", exact: true })
     .click();
-  assert.equal(await page.locator(".entity").count(), 5);
+  assert.equal(await page.locator(".entity").count(), 6);
   console.log("PASS confirmed task and company deletion");
   await page.getByRole("button", { name: "Hermès", exact: true }).click();
   await page.getByText("IA non connectée", { exact: true }).waitFor();
   await page
     .getByLabel("Entreprise de la note")
-    .selectOption({ label: "Afrodemy" });
+    .selectOption({ label: "AFROGROUP SAS" });
   await page.getByLabel("Note pour Hermès").fill("Note de test Hermès");
   await page
     .getByRole("button", { name: "Vérifier la note", exact: true })
@@ -183,7 +183,7 @@ const out = (name) => path.join(output, name);
       await page.evaluate(
         () =>
           JSON.parse(localStorage.getItem("pio-finance-v1")).companies.find(
-            (c) => c.name === "Afrodemy",
+            (c) => c.name === "AFROGROUP SAS",
           ).notes,
       )
     ).includes("Note de test Hermès"),
@@ -196,7 +196,7 @@ const out = (name) => path.join(output, name);
       await page.evaluate(
         () =>
           JSON.parse(localStorage.getItem("pio-finance-v1")).companies.find(
-            (c) => c.name === "Afrodemy",
+            (c) => c.name === "AFROGROUP SAS",
           ).notes,
       )
     ).includes("Note de test Hermès"),
@@ -226,12 +226,12 @@ const out = (name) => path.join(output, name);
   assert.notEqual(await page.locator(".graph").getAttribute("style"), before);
   await page
     .getByRole("textbox", { name: "Rechercher une entreprise" })
-    .fill("Afrodemy");
+    .fill("AFROGROUP SAS");
   await page
     .locator(".search-results button")
-    .filter({ hasText: "Afrodemy" })
+    .filter({ hasText: "AFROGROUP SAS" })
     .click();
-  await page.getByRole("heading", { name: "Afrodemy", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "AFROGROUP SAS", exact: true }).waitFor();
   await page.screenshot({ path: out("mobile-sheet.png"), fullPage: true });
   await page.keyboard.press("Escape");
   assert.equal(await page.locator("dialog").count(), 0);
@@ -291,7 +291,7 @@ const out = (name) => path.join(output, name);
     ).includes("green"),
   );
   assert.equal(await page.locator(".business-link").count(), 1);
-  await page.locator(".entity").filter({ hasText: "Afrodemy" }).click();
+  await page.locator(".entity").filter({ hasText: "AFROGROUP SAS" }).click();
   assert.equal(await page.getByRole("tab").count(), 8);
   await page.getByRole("tab", { name: "Notes", exact: true }).click();
   assert.ok(
@@ -307,7 +307,7 @@ const out = (name) => path.join(output, name);
     await page.locator(".business-link path").getAttribute("stroke-dasharray"),
     "5 6",
   );
-  await page.locator(".entity").filter({ hasText: "Afrodemy" }).click();
+  await page.locator(".entity").filter({ hasText: "AFROGROUP SAS" }).click();
   await page.getByRole("tab", { name: "Finances", exact: true }).click();
   await page.getByLabel("Exercice / nom de la période").fill("Exercice 2025");
   await page.getByLabel("Devise de cette période").fill("EUR");
@@ -323,7 +323,7 @@ const out = (name) => path.join(output, name);
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Carte des participations", exact: true }).click();
-  await page.locator(".entity").filter({ hasText: "Afrodemy" }).click();
+  await page.locator(".entity").filter({ hasText: "AFROGROUP SAS" }).click();
   await page.getByRole("tab", { name: "Finances", exact: true }).click();
   await page
     .getByLabel("Période à consulter")
@@ -354,8 +354,8 @@ const out = (name) => path.join(output, name);
     .getByRole("button", { name: "Tâches des entreprises", exact: true })
     .click();
   for (const [company, title] of [
-    ["Afrodemy", "Préparer le programme"],
-    ["FABI Immobilier", "Préparer le dossier immobilier"],
+    ["AFROGROUP SAS", "Préparer le programme"],
+    ["FABI IMMO", "Préparer le dossier immobilier"],
   ]) {
     await page
       .getByRole("button", { name: "Nouvelle tâche", exact: true })
@@ -371,7 +371,7 @@ const out = (name) => path.join(output, name);
   assert.equal(await page.locator(".task-company-heading").count(), 2);
   await page
     .getByLabel("Entreprise à afficher")
-    .selectOption({ label: "Afrodemy" });
+    .selectOption({ label: "AFROGROUP SAS" });
   assert.equal(await page.locator(".task-row").count(), 1);
   await page
     .getByLabel("Terminer Préparer le programme", { exact: true })

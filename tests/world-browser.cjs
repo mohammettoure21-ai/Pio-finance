@@ -22,15 +22,16 @@ const output = fs.mkdtempSync(
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("http://127.0.0.1:5173/");
+    await page.getByRole("button", { name: "Mon monde", exact: true }).click();
     await page
       .getByRole("heading", { name: "Un monde. Une vision." })
       .waitFor();
-    assert.equal(await page.locator(".world-robot").count(), 5);
+    assert.equal(await page.locator(".world-robot").count(), 6);
     assert.ok((await page.locator(".campus").boundingBox()).width <= 960);
     await page.waitForFunction(
       () =>
         document.querySelectorAll('.world-robot [data-renderer="3d"]')
-          .length === 5,
+          .length === 6,
     );
     assert.equal(
       await page.locator('.world-robot [data-mood="sleeping"]').count(),
@@ -38,7 +39,7 @@ const output = fs.mkdtempSync(
     );
     assert.equal(
       await page.locator('.world-robot [data-workstation="true"]').count(),
-      5,
+      6,
     );
     const commandCanvas = page.locator(".world-robot.command canvas");
     const motionBefore = await commandCanvas.screenshot();
@@ -58,7 +59,7 @@ const output = fs.mkdtempSync(
     assert.equal(await page.locator(".art-station .station-label").count(), 5);
 
     assert.equal(await page.locator(".world-robot.sleeping").count(), 0);
-    assert.equal(await page.locator(".world-robot.ready").count(), 4);
+    assert.equal(await page.locator(".world-robot.ready").count(), 5);
     assert.equal(
       await page
         .locator(".campus-route")
@@ -72,7 +73,7 @@ const output = fs.mkdtempSync(
     });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page
-      .getByRole("button", { name: "Ouvrir FABI Conciergerie", exact: true })
+      .getByRole("button", { name: "Ouvrir FABI CONCIERGERIE", exact: true })
       .click();
     await page.getByRole("button", { name: "Donner une mission" }).click();
     await page.getByLabel("Titre", { exact: true }).fill("Préparer le séjour");
@@ -101,7 +102,7 @@ const output = fs.mkdtempSync(
       fullPage: true,
     });
     await page
-      .getByText("Rapport de FABI Conciergerie reçu par FABI Holding.", {
+      .getByText("Rapport de FABI CONCIERGERIE reçu par AZQAR Holdings.", {
         exact: true,
       })
       .waitFor();
@@ -116,7 +117,7 @@ const output = fs.mkdtempSync(
     assert.equal(deliveryEvents.length, 2);
     assert.equal(
       deliveryEvents[0].recipient,
-      saved.companies.find((c) => c.name === "FABI Immobilier").id,
+      saved.companies.find((c) => c.name === "FABI IMMO").id,
     );
     assert.equal(deliveryEvents[1].recipient, "holding");
     page.on("dialog", (d) => d.accept());
@@ -137,8 +138,9 @@ const output = fs.mkdtempSync(
     );
     assert.equal(await page.locator(".report-courier").count(), 0);
     await page.reload();
+    await page.getByRole("button", { name: "Mon monde", exact: true }).click();
     await page
-      .getByRole("button", { name: "Ouvrir FABI Conciergerie", exact: true })
+      .getByRole("button", { name: "Ouvrir FABI CONCIERGERIE", exact: true })
       .click();
     await page.getByText(/Dernier passage/).waitFor();
     await page
@@ -156,10 +158,10 @@ const output = fs.mkdtempSync(
       .click();
     await page
       .getByLabel("Société à accompagner", { exact: true })
-      .selectOption({ label: "Afrodemy" });
+      .selectOption({ label: "AFROGROUP SAS" });
     await page
       .getByRole("heading", {
-        name: "Préparer le suivi financier de Afrodemy",
+        name: "Préparer le suivi financier de AFROGROUP SAS",
         exact: true,
       })
       .waitFor();
@@ -168,13 +170,13 @@ const output = fs.mkdtempSync(
     );
     await page
       .getByRole("button", {
-        name: "Examiner la suggestion 1 pour Afrodemy",
+        name: "Examiner la suggestion 1 pour AFROGROUP SAS",
         exact: true,
       })
       .click();
     assert.equal(
       await page.getByLabel("Titre", { exact: true }).inputValue(),
-      "Préparer le suivi financier de Afrodemy",
+      "Préparer le suivi financier de AFROGROUP SAS",
     );
     assert.equal(
       await page.evaluate(
@@ -191,7 +193,7 @@ const output = fs.mkdtempSync(
     assert.equal(afterSuggestion.tasks.length, beforeSuggestion + 1);
     assert.equal(
       afterSuggestion.tasks.at(-1).companyId,
-      afterSuggestion.companies.find((c) => c.name === "Afrodemy").id,
+      afterSuggestion.companies.find((c) => c.name === "AFROGROUP SAS").id,
     );
     assert.equal(
       afterSuggestion.vision,
@@ -202,11 +204,11 @@ const output = fs.mkdtempSync(
       .click();
     await page
       .getByLabel("Société à accompagner", { exact: true })
-      .selectOption({ label: "Afrodemy" });
+      .selectOption({ label: "AFROGROUP SAS" });
     assert.equal(
       await page
         .getByRole("heading", {
-          name: "Préparer le suivi financier de Afrodemy",
+          name: "Préparer le suivi financier de AFROGROUP SAS",
           exact: true,
         })
         .count(),
@@ -249,6 +251,7 @@ const output = fs.mkdtempSync(
       localStorage.setItem("pio-finance-v1", JSON.stringify(d));
     });
     await page.reload();
+    await page.getByRole("button", { name: "Mon monde", exact: true }).click();
     assert.equal(await page.locator(".world-robot.overloaded").count(), 1);
     await page.getByRole("button", { name: /Bilans de Holding/ }).click();
     await page
@@ -256,10 +259,11 @@ const output = fs.mkdtempSync(
         name: "Ce qui avance. Ce qui demande de l’aide.",
       })
       .waitFor();
-    const row = page.getByRole("row").filter({ hasText: "FABI Immobilier" });
+    const row = page.getByRole("row").filter({ hasText: "FABI IMMO" });
     assert.equal(await row.locator("td").first().textContent(), "1");
     assert.equal(await row.locator("td").nth(3).textContent(), "6");
     await page.reload();
+    await page.getByRole("button", { name: "Mon monde", exact: true }).click();
     assert.equal(
       await page.evaluate(
         () =>
@@ -275,11 +279,11 @@ const output = fs.mkdtempSync(
     assert.deepEqual(await commandCanvas.screenshot(), reducedBefore);
 
     await page
-      .getByRole("button", { name: "Ouvrir FABI Conciergerie", exact: true })
+      .getByRole("button", { name: "Ouvrir FABI CONCIERGERIE", exact: true })
       .click();
     await page.getByRole("button", { name: "Porter un rapport" }).click();
     await page
-      .getByText("Rapport de FABI Conciergerie reçu par FABI Holding.", {
+      .getByText("Rapport de FABI CONCIERGERIE reçu par AZQAR Holdings.", {
         exact: true,
       })
       .waitFor();
@@ -297,29 +301,30 @@ const output = fs.mkdtempSync(
 
     await page.setViewportSize({ width: 1440, height: 1100 });
     await page
-      .getByRole("button", { name: "Ouvrir FABI Immobilier", exact: true })
+      .getByRole("button", { name: "Ouvrir FABI IMMO", exact: true })
       .click();
     await page
       .getByRole("button", { name: "Ouvrir la fiche", exact: true })
       .click();
     await page
       .getByLabel("Nom de l’entreprise", { exact: true })
-      .fill("FABI Immobilier Groupe");
+      .fill("FABI IMMO Groupe");
     await page
       .getByRole("button", { name: "Enregistrer", exact: true })
       .click();
     assert.equal(
       await page
         .locator(".art-station .station-label")
-        .filter({ hasText: "FABI Immobilier Groupe" })
+        .filter({ hasText: "FABI IMMO Groupe" })
         .count(),
       1,
     );
     await page.reload();
+    await page.getByRole("button", { name: "Mon monde", exact: true }).click();
     assert.equal(
       await page
         .locator(".art-station .station-label")
-        .filter({ hasText: "FABI Immobilier Groupe" })
+        .filter({ hasText: "FABI IMMO Groupe" })
         .count(),
       1,
     );

@@ -11,13 +11,15 @@ export default function CampusRobot({
 }) {
   const key = name.trim().toLowerCase();
   const color =
-    key === "fabi holding"
+    ["procolore", "procolor"].includes(key)
+      ? "#4285f4"
+      : ["fabi holding", "azqar holdings"].includes(key)
       ? "#323943"
-      : key === "fabi immobilier"
+      : ["fabi immobilier", "fabi immo"].includes(key)
         ? "#f3c328"
         : key === "fabi conciergerie"
           ? "#ed80b1"
-          : ["afrodemy", "afrodémy"].includes(key)
+          : ["afrodemy", "afrodémy", "afrogroup sas", "afrogroup"].includes(key)
             ? "#26b887"
             : "#e6ecf2";
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -57,6 +59,7 @@ export default function CampusRobot({
       role="img"
       aria-label={`Robot ${name}`}
       data-renderer={ready ? "3d" : "fallback"}
+      data-color={color}
       data-mood={mood}
       data-workstation={mood !== "walking"}
     >

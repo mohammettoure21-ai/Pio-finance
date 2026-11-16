@@ -3,7 +3,7 @@ import { useId } from "react";
 export default function FinanceRobot({ name }: { name: string }) {
   const id = useId().replace(/:/g, "");
   const key = name.trim().toLowerCase();
-  const color = key === "fabi holding" ? "#34343c" : key === "fabi immobilier" ? "#ffd126" : key === "fabi conciergerie" ? "#ff80b4" : ["afrodemy", "afrodémy"].includes(key) ? "#13c896" : "#eeeef2";
+  const color = ["procolore", "procolor"].includes(key) ? "#4285f4" : ["fabi holding", "azqar holdings"].includes(key) ? "#34343c" : ["fabi immobilier", "fabi immo"].includes(key) ? "#ffd126" : key === "fabi conciergerie" ? "#ff80b4" : ["afrodemy", "afrodémy", "afrogroup sas", "afrogroup"].includes(key) ? "#13c896" : "#eeeef2";
   return <svg className="finance-robot" viewBox="0 0 140 150" role="img" aria-label={`Robot ${name}`}>
     <defs>
       <radialGradient id={`${id}-shell`} cx="30%" cy="20%" r="85%"><stop stopColor="white"/><stop offset=".24" stopColor={color}/><stop offset=".75" stopColor={color}/><stop offset="1" stopColor="#25252f"/></radialGradient>

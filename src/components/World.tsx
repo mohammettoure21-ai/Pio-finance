@@ -28,7 +28,7 @@ type Place = {
 function places(data: Portfolio): Place[] {
   const slots = [
     {
-      names: ["fabi immobilier"],
+      names: ["fabi immobilier", "fabi immo"],
       x: 225,
       y: 225,
       sign: { x: 110, y: 135, width: 220, angle: -14 },
@@ -46,7 +46,7 @@ function places(data: Portfolio): Place[] {
       spriteName: "FABI Conciergerie",
     },
     {
-      names: ["afrodemy", "afrodémy"],
+      names: ["afrodemy", "afrodémy", "afrogroup sas", "afrogroup"],
       x: 1000,
       y: 225,
       sign: { x: 938, y: 105, width: 235, angle: 13 },
@@ -94,21 +94,21 @@ function places(data: Portfolio): Place[] {
       sign: { x: 492, y: 121, width: 255, angle: 0 },
       color: "#d6c79b",
       role: "CENTRE DE COMMANDEMENT",
-      spriteName: "FABI Holding",
+      spriteName: data.holdingName,
       art: true,
     },
     ...data.companies.map((c) => {
       const slot = assignments.get(c.id);
       if (slot !== undefined)
-        return { id: c.id, name: c.name, ...slots[slot], art: true };
+        return { id: c.id, name: c.name, ...slots[slot], spriteName: c.name, art: true };
       const i = extra++;
       return {
         id: c.id,
         name: c.name,
         x: 225 + (i % 3) * 375,
         y: 990 + Math.floor(i / 3) * 350,
-        color: "#8da9e5",
-        role: "ATELIER INDÉPENDANT",
+        color: ["procolore", "procolor"].includes(c.name.trim().toLowerCase()) ? "#4285f4" : "#8da9e5",
+        role: ["procolore", "procolor"].includes(c.name.trim().toLowerCase()) ? "INDUSTRIE DE LA PEINTURE" : "ATELIER INDÉPENDANT",
         spriteName: c.name,
         art: false,
       };
