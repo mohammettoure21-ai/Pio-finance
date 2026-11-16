@@ -5,3 +5,16 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Defense in depth: private runtime state and exports never belong in Git.
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.token
+*.password
+*.pem
+private/
+exports/
+credentials/
+verification/

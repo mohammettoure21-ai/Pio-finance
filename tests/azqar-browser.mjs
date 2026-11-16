@@ -50,7 +50,7 @@ try {
   await page.reload();
   await page.getByRole("heading", { name: "Portefeuille inaccessible" }).waitFor();
   assert.equal(await page.evaluate(() => localStorage.getItem("pio-finance-v1")), "{broken");
-  assert.equal(await page.getByRole("button").count(), 1);
+  assert.equal(await page.getByRole("button").count(), 2);
   assert.deepEqual(errors, []);
   console.log(`PASS AZQAR structure, monochrome theme, mobile, blue Procolore, original backup, preservation and blocked corrupt save. Screenshots: ${output}`);
 } finally { await browser.close(); }

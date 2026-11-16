@@ -806,7 +806,7 @@ export default function App() {
       getItem: (key) => localStorage.getItem(key),
       setItem: (key, value) => localStorage.setItem(key, value),
     });
-    return { data: result.data ?? initialPortfolio(), error: result.error };
+    return { data: result.data ?? initialPortfolio(), error: result.error, raw: result.raw };
   });
   const [data, setData] = useState<Portfolio>(loaded.data);
   const [storageError, setStorageError] = useState(loaded.error);
@@ -984,6 +984,14 @@ export default function App() {
       <h1>Portefeuille inaccessible</h1>
       <p>{loaded.error}</p>
       <p>Les modifications et l’import sont bloqués pour protéger vos données. Ne supprimez pas les données du navigateur.</p>
+      {loaded.raw !== null && <button onClick={() => {
+        const url = URL.createObjectURL(new Blob([loaded.raw!], { type: "application/octet-stream" }));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "pio-finance-sauvegarde-brute.txt";
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }}>Exporter le contenu brut</button>}
       <button className="primary" onClick={() => window.location.reload()}>Réessayer la lecture</button>
     </main>
   );

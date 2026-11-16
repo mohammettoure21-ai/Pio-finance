@@ -1,6 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
+  "git": {
+    "deploymentEnabled": {
+      "feat/hermes-holding-bridge": false
+    }
+  },
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "headers": [

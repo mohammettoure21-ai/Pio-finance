@@ -1,0 +1,357 @@
+{
+  "main": "457901275d68b73020edec1f60f7bb1265c7ccc1",
+  "bridge": "22d8d8200ec09fa2c340e111d254bfd7f0de8a5b",
+  "allMainPathsPresent": true,
+  "mainPaths": 45,
+  "unchangedMainPaths": 36,
+  "modifiedMainPaths": [
+    ".env.example",
+    ".gitignore",
+    "README.md",
+    "package-lock.json",
+    "package.json",
+    "src/App.tsx",
+    "src/finance/storage.ts",
+    "tests/azqar-browser.mjs",
+    "vercel.json"
+  ],
+  "criticalAzqarAndGuidedConnectionUnchanged": [
+    "src/components/GroupPresentation.tsx",
+    "src/components/HermesConnection.tsx",
+    "src/finance/connection.ts",
+    "src/finance/azqar.ts",
+    "src/components/SecureConnection.tsx",
+    "src/components/secure.css",
+    "src/finance/secure.ts",
+    "src/components/CampusRobot.tsx",
+    "src/components/FinanceRobot.tsx",
+    "src/components/World.tsx",
+    "src/finance/model.ts",
+    "src/styles.css",
+    "tests/azqar.test.mjs",
+    "tests/connection.test.mjs",
+    "tests/connection-browser.mjs"
+  ],
+  "intentionalFrontendChanges": {
+    "src/App.tsx": "retain raw corrupt-save export from bridge, preserving guided connection and blocked recovery",
+    "src/finance/storage.ts": "return original raw save alongside AZQAR migration result; no additional reads/writes",
+    "tests/azqar-browser.mjs": "expect retry plus raw export buttons in blocked recovery"
+  },
+  "files": [
+    {
+      "path": ".env.example",
+      "mainBlob": "d5062562ca3b706d102487cb68a76885143a4556",
+      "candidateBlob": "9dbc5fc4f43e6989599d631d2883c1573ac38e20",
+      "present": true,
+      "unchanged": false
+    },
+    {
+      "path": ".gitignore",
+      "mainBlob": "3a8791ec1d85ce24691710746e6c1c816c3083cf",
+      "candidateBlob": "a6e2ad7aef922168b235857ec891437807dbfe03",
+      "present": true,
+      "unchanged": false
+    },
+    {
+      "path": "README.md",
+      "mainBlob": "a9b62bc0523e30733a2ca5e7c43314608d5bfa5a",
+      "candidateBlob": "f2e3b1c9c7556d0b243b5bc4015124155a02bccd",
+      "present": true,
+      "unchanged": false
+    },
+    {
+      "path": "index.html",
+      "mainBlob": "b53992f85088406fe869565e4d7fca91232ca9fd",
+      "candidateBlob": "b53992f85088406fe869565e4d7fca91232ca9fd",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "package-lock.json",
+      "mainBlob": "de194efb89f5608c4178f445687dc172af031da8",
+      "candidateBlob": "dfa77d5e15ab4eaa3f28838e2fd2fef6ed2bc61a",
+      "present": true,
+      "unchanged": false
+    },
+    {
+      "path": "package.json",
+      "mainBlob": "0206eb1d47b6562122e3c796d2090ff7bfe658ad",
+      "candidateBlob": "4021a4fef0ef1b96f2b4e1c5a6636b88b6b59e2b",
+      "present": true,
+      "unchanged": false
+    },
+    {
+      "path": "public/world/campus.png",
+      "mainBlob": "b4f1a33dc38351bb4e0a7adeb25359039b183f4a",
+      "candidateBlob": "b4f1a33dc38351bb4e0a7adeb25359039b183f4a",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/App.tsx",
+      "mainBlob": "40ee848301b4b2bcd5e412422af6209e0473e3b4",
+      "candidateBlob": "4339ac0ea42b474e2cbcbdbd7cad96804a0a2af9",
+      "present": true,
+      "unchanged": false
+    },
+    {
+      "path": "src/components/CampusRobot.tsx",
+      "mainBlob": "5334224615d044f6e8d6bf39acbe661ab241bbee",
+      "candidateBlob": "5334224615d044f6e8d6bf39acbe661ab241bbee",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/Character.tsx",
+      "mainBlob": "fa2afeeec627ba4ed2bcff74c249d0d7a0259213",
+      "candidateBlob": "fa2afeeec627ba4ed2bcff74c249d0d7a0259213",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/Dialog.tsx",
+      "mainBlob": "96976069f4810e961707fd02bb317bdad79167fe",
+      "candidateBlob": "96976069f4810e961707fd02bb317bdad79167fe",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/DomainCard.tsx",
+      "mainBlob": "f7ae72fc90a3193e9e4f2f0f9c19d8ebeca483aa",
+      "candidateBlob": "f7ae72fc90a3193e9e4f2f0f9c19d8ebeca483aa",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/FinanceRobot.tsx",
+      "mainBlob": "d464592006412d18171137c2511a7190f3a625cb",
+      "candidateBlob": "d464592006412d18171137c2511a7190f3a625cb",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/GroupPresentation.tsx",
+      "mainBlob": "a0fbdbac9f04ce73de2a81542e2a5c6c935a89d4",
+      "candidateBlob": "a0fbdbac9f04ce73de2a81542e2a5c6c935a89d4",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/HermesConnection.tsx",
+      "mainBlob": "172a1e06f67b92fe6ebaa1acc820513f805a61ca",
+      "candidateBlob": "172a1e06f67b92fe6ebaa1acc820513f805a61ca",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/HermesSuggestions.tsx",
+      "mainBlob": "7bd57f27df9db5f5190b501b3c75993bd8111331",
+      "candidateBlob": "7bd57f27df9db5f5190b501b3c75993bd8111331",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/SecureConnection.tsx",
+      "mainBlob": "ba173c0e3ebaad769b79bfe89603109696ee697f",
+      "candidateBlob": "ba173c0e3ebaad769b79bfe89603109696ee697f",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/World.tsx",
+      "mainBlob": "18e5627555f5ecb553a5bfc4be475bebf26039f7",
+      "candidateBlob": "18e5627555f5ecb553a5bfc4be475bebf26039f7",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/robot3d.ts",
+      "mainBlob": "69951291d90f1d9ed0cfa585cfdecd9608a4b13f",
+      "candidateBlob": "69951291d90f1d9ed0cfa585cfdecd9608a4b13f",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/secure.css",
+      "mainBlob": "dc59cfc3590ee17afbd59103761886fa92f33f1d",
+      "candidateBlob": "dc59cfc3590ee17afbd59103761886fa92f33f1d",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/components/world.css",
+      "mainBlob": "e6ae835a335cb92562f6959b0dacbbdff132cedf",
+      "candidateBlob": "e6ae835a335cb92562f6959b0dacbbdff132cedf",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/data/domains.ts",
+      "mainBlob": "7ee1a20b17b162291588566eda9a7ca31368a3a0",
+      "candidateBlob": "7ee1a20b17b162291588566eda9a7ca31368a3a0",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/finance/azqar.ts",
+      "mainBlob": "f3a10c06fc430adf6d2bf1ef4d2235f065294d5f",
+      "candidateBlob": "f3a10c06fc430adf6d2bf1ef4d2235f065294d5f",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/finance/connection.ts",
+      "mainBlob": "427a6665fb11b583a6189b34b86c5675a80ede0a",
+      "candidateBlob": "427a6665fb11b583a6189b34b86c5675a80ede0a",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/finance/integrations.ts",
+      "mainBlob": "a8476ff8eeb72390e93581fe96712a80cb8c5290",
+      "candidateBlob": "a8476ff8eeb72390e93581fe96712a80cb8c5290",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/finance/model.ts",
+      "mainBlob": "d2144ca1b130b946901916c1b22766642d9f899f",
+      "candidateBlob": "d2144ca1b130b946901916c1b22766642d9f899f",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/finance/secure.ts",
+      "mainBlob": "4f4bc1c3a6a117fab2f5df18fab174f0f4e660e3",
+      "candidateBlob": "4f4bc1c3a6a117fab2f5df18fab174f0f4e660e3",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/finance/storage.ts",
+      "mainBlob": "87a39df346539c1abe2fc7bc83711eac104cbdf7",
+      "candidateBlob": "bd6a528299529042dd56fde26032222d0f492685",
+      "present": true,
+      "unchanged": false
+    },
+    {
+      "path": "src/finance/suggestions.ts",
+      "mainBlob": "96b03016fc7ad713e729b44b8be45eb1e0d436f5",
+      "candidateBlob": "96b03016fc7ad713e729b44b8be45eb1e0d436f5",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/finance/world.ts",
+      "mainBlob": "4ae515f9b1bc0126167b61279befd19c1e3f5324",
+      "candidateBlob": "4ae515f9b1bc0126167b61279befd19c1e3f5324",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/hooks/useStored.ts",
+      "mainBlob": "90f24af3855f3e02bf39e449589cd5289286a913",
+      "candidateBlob": "90f24af3855f3e02bf39e449589cd5289286a913",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/main.tsx",
+      "mainBlob": "c528e68af4bc1a52ec2ecb7d5cf61aca94bee087",
+      "candidateBlob": "c528e68af4bc1a52ec2ecb7d5cf61aca94bee087",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "src/styles.css",
+      "mainBlob": "4d1db7b0c54d0540d3ad9a1ea38182efdd7a6790",
+      "candidateBlob": "4d1db7b0c54d0540d3ad9a1ea38182efdd7a6790",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/azqar-browser.mjs",
+      "mainBlob": "5064104dfa4e20eebdbafe1b02f7af37507726e5",
+      "candidateBlob": "5d3a782827badec88736cac2bbc5edeb85610dd6",
+      "present": true,
+      "unchanged": false
+    },
+    {
+      "path": "tests/azqar.test.mjs",
+      "mainBlob": "739c1727f0e3ece0e14ff76598f8189c67a86c66",
+      "candidateBlob": "739c1727f0e3ece0e14ff76598f8189c67a86c66",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/browser-smoke.cjs",
+      "mainBlob": "447b085c8a704f263b8eb6cd8c8eec85f4c20139",
+      "candidateBlob": "447b085c8a704f263b8eb6cd8c8eec85f4c20139",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/connection-browser.mjs",
+      "mainBlob": "2adb3d1ab98da724cc927373f56b6026adaaed57",
+      "candidateBlob": "2adb3d1ab98da724cc927373f56b6026adaaed57",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/connection.test.mjs",
+      "mainBlob": "1f95238bf56ba4933f6a3f6549b2143532faab2d",
+      "candidateBlob": "1f95238bf56ba4933f6a3f6549b2143532faab2d",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/portfolio.test.mjs",
+      "mainBlob": "f94cba8cc88e4ef3880abad652d488117d469392",
+      "candidateBlob": "f94cba8cc88e4ef3880abad652d488117d469392",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/secure-client.test.mjs",
+      "mainBlob": "31d65768ad5e33fa430e6e25c16172ddf39753de",
+      "candidateBlob": "31d65768ad5e33fa430e6e25c16172ddf39753de",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/suggestions.test.mjs",
+      "mainBlob": "5c90b16983ecf8cd2cb2cf360f994801d39aee8a",
+      "candidateBlob": "5c90b16983ecf8cd2cb2cf360f994801d39aee8a",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/world-browser.cjs",
+      "mainBlob": "8d6a40678deb9ebcaf78a2404cb57fbfca106914",
+      "candidateBlob": "8d6a40678deb9ebcaf78a2404cb57fbfca106914",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tests/world.test.mjs",
+      "mainBlob": "006f48a54ddba5e2e1d5acc531ef28c585c7ccde",
+      "candidateBlob": "006f48a54ddba5e2e1d5acc531ef28c585c7ccde",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "tsconfig.json",
+      "mainBlob": "eb25cd89dc30db7971a86687ec55eaa94a6314fd",
+      "candidateBlob": "eb25cd89dc30db7971a86687ec55eaa94a6314fd",
+      "present": true,
+      "unchanged": true
+    },
+    {
+      "path": "vercel.json",
+      "mainBlob": "01fda9b01dd1b255b6cf1e999b51efdc750fdc6c",
+      "candidateBlob": "3347a2299fde434a066f971a61f725fcae42db2d",
+      "present": true,
+      "unchanged": false
+    }
+  ]
+}

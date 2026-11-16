@@ -1,0 +1,19 @@
+# MODELE INERTE: unité --user du compte pio-service uniquement, pas fabi.
+# User manager/linger de pio-service, code /srv/pio/current et runtime restent à vérifier.
+# Ne pas installer en plus de l'unité système pio-finance.service.example.
+[Unit]
+Description=PIO Finance bridge loopback (candidate, not activated)
+After=network.target
+[Service]
+Type=simple
+WorkingDirectory=/srv/pio/current
+Environment=PIO_PORT=8787
+Environment=PIO_ORIGIN=https://pio-finance.vercel.app
+ExecStart=/opt/pio/runtime/node /srv/pio/current/server/cli.mjs serve --data-dir /var/lib/pio-finance/private
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=yes
+TimeoutStopSec=30
+[Install]
+WantedBy=default.target

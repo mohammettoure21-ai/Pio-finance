@@ -1,0 +1,26 @@
+# MODELE SYSTEME, installé/validé uniquement par administrateur propriétaire.
+# Le compte technique caddy et le binaire /usr/bin/caddy sont à vérifier/préparer.
+# Aucun setcap global ni privilège ajouté à fabi. Port 8787 reste loopback.
+[Unit]
+Description=PIO HTTPS proxy (not activated)
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+User=caddy
+Group=caddy
+ExecStart=/usr/bin/caddy run --config /etc/caddy/pio.Caddyfile --adapter caddyfile
+Restart=on-failure
+RestartSec=5
+Environment=HOME=/var/lib/caddy
+StateDirectory=caddy
+UMask=0077
+NoNewPrivileges=yes
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/caddy
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+{
+  "mcp_servers": {
+    "pio_finance": {
+      "command": "/usr/bin/ssh",
+      "args": ["-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "IdentitiesOnly=yes", "-o", "ClearAllForwardings=yes", "-o", "UserKnownHostsFile=/home/fabi/.config/pio-mcp/known_hosts", "-i", "/home/fabi/.config/pio-mcp/holding_mcp", "pio-holding@127.0.0.1"],
+      "timeout": 30,
+      "connect_timeout": 15,
+      "sampling": { "enabled": false },
+      "tools": { "include": ["pio_read_context", "pio_propose_mission"] }
+    }
+  }
+}

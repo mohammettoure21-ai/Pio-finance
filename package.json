@@ -4,14 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "test": "node tests/portfolio.test.mjs && node tests/world.test.mjs && node tests/suggestions.test.mjs && node tests/azqar.test.mjs && node --test tests/secure-client.test.mjs tests/connection.test.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "npm run test:legacy && npm run test:bridge",
     "test:e2e": "node tests/browser-smoke.cjs",
     "test:world": "node tests/world-browser.cjs",
     "test:azqar": "node tests/azqar-browser.mjs",
-    "test:connection": "node tests/connection-browser.mjs"
+    "test:connection": "node tests/connection-browser.mjs",
+    "bridge": "node server/cli.mjs",
+    "test:legacy": "node tests/portfolio.test.mjs && node tests/world.test.mjs && node tests/suggestions.test.mjs && node tests/azqar.test.mjs && node --test tests/connection.test.mjs",
+    "test:bridge": "node --test tests/bridge.test.mjs tests/authorization-race.test.mjs tests/agents.test.mjs tests/operator.test.mjs tests/proposals.test.mjs tests/concurrency.test.mjs tests/secure-client.test.mjs tests/private.test.mjs tests/cli.test.mjs tests/mcp.test.mjs tests/persistence.test.mjs tests/holding.test.mjs tests/backup-restore.test.mjs tests/https-proxy.test.mjs",
+    "verify": "node scripts/verify.mjs",
+    "test:secure-browser": "node --test tests/secure-browser.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -26,5 +31,8 @@
     "playwright": "1.61.1",
     "typescript": "^5.8.0",
     "vite": "^6.1.0"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }
