@@ -1,0 +1,589 @@
+{
+  "schemaVersion": 1,
+  "scope": "LOCAL synthetic integration only; no deployment or publication",
+  "generatedAt": "2026-11-16T15:39:54.186852+00:00",
+  "repository": "C:\\Users\\hp\\AppData\\Local\\hermes\\workspaces\\fabi-holding\\pio-deployment-candidate",
+  "branch": "candidate/main-holding-integration",
+  "integrationCommit": "0297d37d62657ed18b8fb01e2320b5474c41bbc8",
+  "integrationParents": [
+    "457901275d68b73020edec1f60f7bb1265c7ccc1",
+    "22d8d8200ec09fa2c340e111d254bfd7f0de8a5b"
+  ],
+  "sources": {
+    "main": "457901275d68b73020edec1f60f7bb1265c7ccc1",
+    "bridge": "22d8d8200ec09fa2c340e111d254bfd7f0de8a5b"
+  },
+  "diffFromMainAtIntegration": "52 files changed, 2475 insertions(+), 20 deletions(-)",
+  "originalCheckout": {
+    "path": "C:\\Users\\hp\\AppData\\Local\\hermes\\workspaces\\fabi-holding\\pio-finance",
+    "head": "c57f9b7a536f5f4f96d34814caf02708cf139b18",
+    "clean": true,
+    "modified": false
+  },
+  "runtime": {
+    "node": "v26.7.0",
+    "npm": "12.0.2",
+    "dependencies": "copied existing local node_modules; npm ls --depth=0 succeeded; no installation",
+    "scratch": "C:/Users/hp/AppData/Local/hermes/cache/scratch",
+    "testTmpVariables": [
+      "TEMP",
+      "TMP",
+      "TMPDIR"
+    ]
+  },
+  "verification": {
+    "startedAt": "2026-11-16T15:29:03.410Z",
+    "node": "v26.7.0",
+    "steps": [
+      {
+        "name": "unit-http-mcp",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "--test",
+          "--test-reporter=tap",
+          "tests/portfolio.test.mjs",
+          "tests/world.test.mjs",
+          "tests/suggestions.test.mjs",
+          "tests/azqar.test.mjs",
+          "tests/connection.test.mjs",
+          "tests/bridge.test.mjs",
+          "tests/authorization-race.test.mjs",
+          "tests/agents.test.mjs",
+          "tests/operator.test.mjs",
+          "tests/proposals.test.mjs",
+          "tests/concurrency.test.mjs",
+          "tests/secure-client.test.mjs",
+          "tests/private.test.mjs",
+          "tests/cli.test.mjs",
+          "tests/mcp.test.mjs",
+          "tests/persistence.test.mjs",
+          "tests/holding.test.mjs",
+          "tests/backup-restore.test.mjs",
+          "tests/https-proxy.test.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 13681,
+        "counts": {
+          "tests": 50,
+          "pass": 50,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "name": "secure-browser",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "--test",
+          "--test-reporter=tap",
+          "tests/secure-browser.test.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 15413,
+        "counts": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "name": "main-azqar-browser",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "--test",
+          "--test-reporter=tap",
+          "tests/main-browser.test.mjs"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 92208,
+        "counts": {
+          "tests": 5,
+          "pass": 5,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "name": "typescript",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "node_modules/typescript/bin/tsc",
+          "-b"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 8745
+      },
+      {
+        "name": "vite-build",
+        "command": [
+          "C:\\Users\\hp\\AppData\\Local\\hermes\\tools\\node-26.7.0-win32-x64\\node.exe",
+          "node_modules/vite/bin/vite.js",
+          "build"
+        ],
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 12651
+      }
+    ],
+    "status": "passed",
+    "finishedAt": "2026-11-16T15:31:26.122Z",
+    "testTotals": {
+      "tests": 56,
+      "pass": 56,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "productionDeployed": false,
+    "personalDataUsed": false
+  },
+  "testCountsNote": "56 TAP tests includes 50 unit/HTTP/MCP entries, 1 secure-browser and main browser 4 child scenarios plus 1 container; TAP totals independently re-parsed",
+  "coverage": [
+    "main AZQAR three-axis presentation, Procolore blue, monochrome/mobile, lossless migration and original backup",
+    "guided connection zero initial requests, explicit readiness and absent-service password gate",
+    "browser real backend login, explicit consent, initialize, review/edit, exactly-one mission and local backup",
+    "corrupt/inaccessible local store blocked without writes or API; original raw export",
+    "HTTP auth, roles, assigned company IDs, CSRF, HTTPS origin/Host and Secure cookie",
+    "Holding full read without state mutation; owner operations denied; revocation",
+    "CAS/idempotency, proposal deduplication, races and exactly-once confirmation",
+    "real MCP stdio initialize/tools-list/tools-call, no owner tools",
+    "SQLite close/reopen persistence of sessions/proposals/history/idempotency and revoked keys",
+    "stopped SQLite tar archive + SHA256 + ephemeral fixture-only GPG encryption/decryption + independent restoration + PRAGMA integrity_check + exact AZQAR state + invalidate sessions + revoke restored token",
+    "local real TLS reverse proxy fixture with explicitly trusted CA and no TLS validation bypass"
+  ],
+  "productionChanges": {
+    "push": false,
+    "deployment": false,
+    "serverChanges": false,
+    "profileChanges": false,
+    "ownerBrowserRead": false,
+    "realPortfolioRead": false,
+    "realCredentialsCreated": false,
+    "backupOfRealData": false
+  },
+  "templates": {
+    "directory": "deploy",
+    "activated": false,
+    "caddyDefaultDeny": "TEST-NET 192.0.2.1/32, not an approved live egress range",
+    "vercelRewriteApplied": false,
+    "jsonParsing": "3 new deployment JSON files parsed successfully",
+    "shellSyntax": "bash -n deploy/pio-holding-stdio.example.sh exit 0",
+    "systemdOrCaddySyntaxOnTarget": "not tested; no install or activation"
+  },
+  "tddEvidence": [
+    "verification/red-initial-merge.json",
+    "verification/red-initial-merge-browser.log",
+    "verification/red-raw-export.log"
+  ],
+  "limits": [
+    "No real remote HTTPS/Vercel/Caddy/browser cookie roundtrip or ACME proof",
+    "No approved external-proxy/private access control yet; Caddy model intentionally fail-closed",
+    "Caddy docs fetch failed local TLS verification: expired certificate; TLS was not bypassed",
+    "Shared fabi UID profiles are not a sandbox; role accounts do not prove all-tools isolation",
+    "SSH forced-command templates not run; current role shell nologin may block launch",
+    "No target systemd user-manager/linger/reboot/runtime shared execution proof",
+    "No real owner import, actual scoped key grant, MCP registration or portfolio read",
+    "No actual off-server backup or production recovery test",
+    "Vite nonblocking chunk-size warning: robot3d 523.49 kB"
+  ],
+  "logs": [
+    {
+      "path": "verification/azqar-browser.mjs.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/azqar-browser.mjs.stdout.log",
+      "sha256": "69d4da8a5cbee1c69cf1efa9319cb78895ddcdc2bbc0923664cbd4b9905bd805",
+      "bytes": 201
+    },
+    {
+      "path": "verification/browser-smoke.cjs.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/browser-smoke.cjs.stdout.log",
+      "sha256": "492a200783b87a3b2e6567d7aa7ff956792a4ae3c0541a40a61103b4a11394d3",
+      "bytes": 882
+    },
+    {
+      "path": "verification/connection-browser.mjs.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/connection-browser.mjs.stdout.log",
+      "sha256": "2c9f6c92a57f30443b6aef3f7d173c3fd1dfd59091efd640480027690b49546d",
+      "bytes": 127
+    },
+    {
+      "path": "verification/extra-initial.log",
+      "sha256": "e2ae6e4a5a4aede1bb43baddc06c47124c6e377365964b77e5b17f76ed8e6f02",
+      "bytes": 1541
+    },
+    {
+      "path": "verification/main-azqar-browser.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/main-azqar-browser.stdout.log",
+      "sha256": "9814ba591dc50ef3b412b77e826612868ae130df1bd5d8dea878074c60cb5da4",
+      "bytes": 2544
+    },
+    {
+      "path": "verification/main-browser-initial.log",
+      "sha256": "98a63098372d7b2b995f7a9612e84c8b69b31c792a002a104b08d91f1dad8848",
+      "bytes": 2544
+    },
+    {
+      "path": "verification/red-initial-merge-browser.log",
+      "sha256": "3e75909f4191dbd56b90bf1a9db7139a39017abad5f6ef69a7821ee311eaf735",
+      "bytes": 1236
+    },
+    {
+      "path": "verification/red-raw-export.log",
+      "sha256": "4b2cd1bfb6bf1109e56c92a33126e2e1d912137ce6bc87c493c4830226f10b55",
+      "bytes": 1163
+    },
+    {
+      "path": "verification/secure-browser.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/secure-browser.stdout.log",
+      "sha256": "fa42f181df7413f0fc452bb13f24f91f86fccee67642181c1c203418b63b6fd1",
+      "bytes": 426
+    },
+    {
+      "path": "verification/typescript.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/typescript.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/unit-http-mcp.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/unit-http-mcp.stdout.log",
+      "sha256": "bc7ac4fcde9bf6ca82db4c9bc77e5aa468e5813555aa26a1bf0fffe8c29ee07e",
+      "bytes": 12760
+    },
+    {
+      "path": "verification/vite-build.stderr.log",
+      "sha256": "ccb6bf354a0674eeb1e49df9a880a000b75240079fdb849282bb899d81eeb58c",
+      "bytes": 332
+    },
+    {
+      "path": "verification/vite-build.stdout.log",
+      "sha256": "5953871b73e0ec5f6c8472b29d07abaddd316e1be4d8bc8345e9e20530cad242",
+      "bytes": 400
+    },
+    {
+      "path": "verification/world-browser.cjs.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "verification/world-browser.cjs.stdout.log",
+      "sha256": "fbb719a829609f399ce71da4ec1fb09ace447942a880aa1e3e870073191bd9fc",
+      "bytes": 452
+    }
+  ],
+  "testedCodeFileHashes": [
+    {
+      "path": "src/App.tsx",
+      "sha256": "515babf62ef811c6e284b87dc9870b5624f3025b639d45d09c37d93587adeb1b"
+    },
+    {
+      "path": "src/components/CampusRobot.tsx",
+      "sha256": "d6f8c4455163c77906f4d0142b9790a7d902ca58608c3eacf41b49057ecfd96e"
+    },
+    {
+      "path": "src/components/Character.tsx",
+      "sha256": "f2c09db4be1d0cb73d2dbbe2654e3c08a9a2b726cfedfcd2a330f499618aceda"
+    },
+    {
+      "path": "src/components/Dialog.tsx",
+      "sha256": "848b35a2488dfd35c14b9b4ae1dd6e8094afedd3f650c34d44702376c41c4ed5"
+    },
+    {
+      "path": "src/components/DomainCard.tsx",
+      "sha256": "62d00def950cf1c9e3104c369fb19260878fc6fd1096edafe57fc47fb1c83eab"
+    },
+    {
+      "path": "src/components/FinanceRobot.tsx",
+      "sha256": "05a3e77b7672468e2f050f9ef7cff00d32b92c174dd1191e61a6b53cba26a280"
+    },
+    {
+      "path": "src/components/GroupPresentation.tsx",
+      "sha256": "20aed9cd1fb6b36c8919d109b65b62e35435968492d8892c07f32e0c8b00a769"
+    },
+    {
+      "path": "src/components/HermesConnection.tsx",
+      "sha256": "2427da7b0c2c3528a3bfa3b425f406260abd89bb8a14e5daf6a35fcef1f48e07"
+    },
+    {
+      "path": "src/components/HermesSuggestions.tsx",
+      "sha256": "fd5a9a3dc3d8e970ad9387f58fdebaea623d10546a49dfce8075fd8618cec1fb"
+    },
+    {
+      "path": "src/components/robot3d.ts",
+      "sha256": "e2d5cefd2b3c06329f689f3d8ee0fbdb8feb27bee06fb898bb146bc1d1c2509c"
+    },
+    {
+      "path": "src/components/secure.css",
+      "sha256": "eef844e9fae31ed811073b44b29a5202ba65a12d23581cf7dfa66d76eafdb26f"
+    },
+    {
+      "path": "src/components/SecureConnection.tsx",
+      "sha256": "2bfc63f616a63a59bb0f3103c1af28dbd299cb0d1246718dfa5fa4a19191093a"
+    },
+    {
+      "path": "src/components/world.css",
+      "sha256": "ad7c3320abcf5a6ad7991ed6edd2eb60800ea0634794f20c52bae7de2865656e"
+    },
+    {
+      "path": "src/components/World.tsx",
+      "sha256": "13b9854932e0b9012e362d247b236afa981721020ed72c22f092ba5b4c76c226"
+    },
+    {
+      "path": "src/data/domains.ts",
+      "sha256": "70ef4b36510ba1d9f4a7cbde988748c3b82874ea664760ef47963391e7496cd6"
+    },
+    {
+      "path": "src/finance/azqar.ts",
+      "sha256": "506fb885a15e155442e82ea55191da2b33ec1fcbcaf36a2b7dc64301d1a0a029"
+    },
+    {
+      "path": "src/finance/connection.ts",
+      "sha256": "c794c21acc6f4d1f9a62a9f946651a45c6bebd3ad35bddfa9b4e7fa476055daa"
+    },
+    {
+      "path": "src/finance/integrations.ts",
+      "sha256": "bcffe4247b83634a984ebcc6d02a507124a3e22a7d32de66e6e3f76d85ee13b8"
+    },
+    {
+      "path": "src/finance/model.ts",
+      "sha256": "aaf2cfeeccb0b12ed13463c8d6096a772ba797e37dc197aa66f46b8c10a485bc"
+    },
+    {
+      "path": "src/finance/secure.ts",
+      "sha256": "d28854e506cc9d2d5b50dfea21e7c3e49ef40b47d37002c030a742f1ac794360"
+    },
+    {
+      "path": "src/finance/storage.ts",
+      "sha256": "4a9d30dc3df5f5ca82a0222301e5549aeaff9fb8d9948d95e89e50d82e609b11"
+    },
+    {
+      "path": "src/finance/suggestions.ts",
+      "sha256": "eb5c6f3dedc598f81180996f5b43fdb12539ea56f86583334e90ea4852c335e4"
+    },
+    {
+      "path": "src/finance/world.ts",
+      "sha256": "3cb643a3a756b4147544dcee79bc734df32042895d9353af0b5447806bb41080"
+    },
+    {
+      "path": "src/hooks/useStored.ts",
+      "sha256": "b069ccbb9ab7892cf0425bd2116e71149072ae2178c5beaaf3a25d7b82e9107d"
+    },
+    {
+      "path": "src/main.tsx",
+      "sha256": "2b67e4fad46c8f360af5521d159d315f3835a6ed6bcef24da80fc93cce373195"
+    },
+    {
+      "path": "src/styles.css",
+      "sha256": "97442626327dbaadeafc5799b74c163b7216813fbaf9075d9b1b657d9c69c152"
+    },
+    {
+      "path": "server/cli.mjs",
+      "sha256": "e2047dc8a6d67333b0f2251c7641bde19660c2989894ebf1d10df543e16e9f70"
+    },
+    {
+      "path": "server/http.mjs",
+      "sha256": "3ca2141055632b49f03762da7d27b53e342e5bd15e83e9c6c09138e33d7aa459"
+    },
+    {
+      "path": "server/mcp.mjs",
+      "sha256": "e0b2b810e41d6bca19a9b643b5b5f75969f270b173b7d01f2dc2fe5977e9dc13"
+    },
+    {
+      "path": "server/operations.mjs",
+      "sha256": "91205db42d51cf8ca61e027bd56589371841a3b21bdbdb7c50070fa816975009"
+    },
+    {
+      "path": "server/operator.mjs",
+      "sha256": "9f4f49d4c80cb7cd8fbce94d08e0e43d693ebc08e4d674450e9dfdf249754224"
+    },
+    {
+      "path": "server/private.mjs",
+      "sha256": "b7932aead5d08c14a8ba7076cbe2a04932dc502a236b741c854ce703abdd4de8"
+    },
+    {
+      "path": "server/proposals.mjs",
+      "sha256": "9fa52190e797134138d6418fdcf0ba67bc018e7c548a392b7fd5d6bcc5b78e6b"
+    },
+    {
+      "path": "server/scopes.mjs",
+      "sha256": "57d08dadab752a9d6e6fdcd9257bdc32c09030fdca2867d19f88b9007e37a55a"
+    },
+    {
+      "path": "server/store.mjs",
+      "sha256": "79ff21740a56fc97d51b168f59dfcf9729229e76016f9f106821b2824b917f00"
+    },
+    {
+      "path": "scripts/verify.mjs",
+      "sha256": "17d275f19a87beccf4aa025c814ec23ef63aa449d63f0aba97fa058ba15209cb"
+    },
+    {
+      "path": "tests/agents.test.mjs",
+      "sha256": "6c14d23f38c7f1771a1a79267dcfbe377ea34eb6fe9e1d2d81b92d17cf01646f"
+    },
+    {
+      "path": "tests/authorization-race.test.mjs",
+      "sha256": "2da91cb590151e363876997842553125f3a9d4b7ddcf24c2aaef22fcd2c4a3fb"
+    },
+    {
+      "path": "tests/azqar-browser.mjs",
+      "sha256": "af44f4e6cbd203c026b2c5a240d5fe10bc68f1f0ba0b6d7552324515dec8d0c0"
+    },
+    {
+      "path": "tests/azqar.test.mjs",
+      "sha256": "73e8c83a85220118d33746fdfbe36853d0ff9064392ec9e519a4bc858f05b7f0"
+    },
+    {
+      "path": "tests/backup-restore.test.mjs",
+      "sha256": "c55f9d443d19d4233af8b2b02d9a7edd442a70cb9fda66c6b0f3da651f2513fc"
+    },
+    {
+      "path": "tests/bridge-fixture.mjs",
+      "sha256": "6314ff0a3c99b53c26880cb5e05f3f2594fe80f7524df5ed7fe9692e2801548d"
+    },
+    {
+      "path": "tests/bridge.test.mjs",
+      "sha256": "304171240a2a9402fbdcda8781c0be143bb503ffbed08e8a10d11b991ed587bb"
+    },
+    {
+      "path": "tests/browser-smoke.cjs",
+      "sha256": "7f13cebfb13160c77e62b651e1dabf3f27c95b45960f110d7442242b82670d5c"
+    },
+    {
+      "path": "tests/cli.test.mjs",
+      "sha256": "e1b849755134fb5904d9dd131e9a38eaa402be18e217f48b7e823913b426b208"
+    },
+    {
+      "path": "tests/concurrency.test.mjs",
+      "sha256": "b8240663c504506e0a0f7fff99220551d1379bdf50e6f4030a65f90b6d86da0d"
+    },
+    {
+      "path": "tests/connection-browser.mjs",
+      "sha256": "1e7cb1c536af75ec9d498cd9c5641d9133db179a251a449df294618b94920ae0"
+    },
+    {
+      "path": "tests/connection.test.mjs",
+      "sha256": "38d9cdd835c76d53b25b1916a1c1c853f8df024f79fb6f9e760838aefca09611"
+    },
+    {
+      "path": "tests/holding.test.mjs",
+      "sha256": "91cdbda62643d68b267d416c61ccda8f76806b3301ba02b4ac0b26640e5b1312"
+    },
+    {
+      "path": "tests/https-proxy.test.mjs",
+      "sha256": "c2308558551509a393781c2d195a475f5dd1aee95763d31cc321b8f18d438046"
+    },
+    {
+      "path": "tests/main-browser.test.mjs",
+      "sha256": "882b136bf23ba724d4b874ff09cebaebd90f8b11b67e4d1ef4cef3af741a8040"
+    },
+    {
+      "path": "tests/mcp.test.mjs",
+      "sha256": "bb9eaddf13b22d5d6e60183aa031229242fe4270a0d30db22e33ca9ebe86cdd4"
+    },
+    {
+      "path": "tests/operator.test.mjs",
+      "sha256": "8a7674b123e006f15db3462837acbee1a2c55416789164b661100134c998018b"
+    },
+    {
+      "path": "tests/persistence.test.mjs",
+      "sha256": "33c435b0fc7307eed326a543ccb3bb8808c4385fb0ab273ce0d9cb4a744b1385"
+    },
+    {
+      "path": "tests/portfolio.test.mjs",
+      "sha256": "ed9d953bc0f1a29ccf519a3c470e4bba16ec0c1f265ea57bea296db58ff976cb"
+    },
+    {
+      "path": "tests/private.test.mjs",
+      "sha256": "b199577f8e3434fb21d9a98bc1eb4ad9245a79aeae2efa41f302e1188fb27769"
+    },
+    {
+      "path": "tests/proposals.test.mjs",
+      "sha256": "4e33660e4dc8245508a63254d1e8b189ca9c2e9a15c54c83484fa125d1ca02c5"
+    },
+    {
+      "path": "tests/secure-browser.test.mjs",
+      "sha256": "5e82aefbdb833dd659eb0bef7b485a85c464e9114ef14dbafc137e53a479aed6"
+    },
+    {
+      "path": "tests/secure-client.test.mjs",
+      "sha256": "6b18b8b291cb2839f56cb013effc01fcf7b451f1fa4801500d01c2ef37f71c63"
+    },
+    {
+      "path": "tests/suggestions.test.mjs",
+      "sha256": "1e7e5f76f2cfeb1391c66a9030c22672a261937ebd56317b3f0a5f751a875531"
+    },
+    {
+      "path": "tests/world-browser.cjs",
+      "sha256": "8a2184b14a3391c5f85161b7302d3da225f3f5aa17414a495102b0c3d421e1b9"
+    },
+    {
+      "path": "tests/world.test.mjs",
+      "sha256": "dff275285d090474a9ebe3c59f0a59491d811a0dffad4a6888f0b60ba4169c43"
+    }
+  ],
+  "dist": [
+    {
+      "path": "dist/assets/index-Bn7QqpqA.js",
+      "sha256": "0347b0a413f17078080547a29bc509681d10e0e99cdfbcaf4e42b16f680062b4",
+      "bytes": 337071
+    },
+    {
+      "path": "dist/assets/index-Y1Vk6ovh.css",
+      "sha256": "008d0c4e10b131c75ccfb3b121cb6af4c26df514e960b8c19fd6f688e2a86031",
+      "bytes": 35485
+    },
+    {
+      "path": "dist/assets/robot3d-B8ck4Yji.js",
+      "sha256": "674af4b7575452273293db4da36f7897e2de968c4e29e27afc911e2be3927ce5",
+      "bytes": 523490
+    },
+    {
+      "path": "dist/index.html",
+      "sha256": "4665f1c8eb010fe239670dedf88b11c1dc0f213be7ddfdcfe41960d959e4a292",
+      "bytes": 658
+    },
+    {
+      "path": "dist/world/campus.png",
+      "sha256": "fb4661d1d8feb3884f1f3b7c4769fc63e2e68522f44dede931e6cf7c9a905ac8",
+      "bytes": 2651371
+    }
+  ]
+}

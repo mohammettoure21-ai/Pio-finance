@@ -43,6 +43,8 @@ Holding, restauration et proxy TLS. Total TAP final : 56 passés, 0 échec,
 0 annulé, 0 ignoré ; 50 unitaires/HTTP/MCP, 1 navigateur réel avec backend,
 5 pour la suite principale navigateur (4 scénarios feuilles + son conteneur TAP).
 TypeScript et Vite build : codes 0. `dist/` est l'artefact de production local.
+Avertissement Vite non bloquant conservé : chunk robot3d de 523,49 kB (>500 kB),
+sans modification de Three.js ni abaissement artificiel du seuil.
 
 Vérifications synthétiques : rejet non authentifié ; rôle propriétaire/agent ;
 lecture Holding du groupe exact sans mutation d'état ; refus d'écriture/confirmation
