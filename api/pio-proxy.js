@@ -10,14 +10,18 @@ export function createRoutedProxy(options) {
   const raw=typeof req.url==='string'?req.url:'';
   const base=raw.split('?')[0];
   let params=new URLSearchParams(raw.includes('?')?raw.slice(raw.indexOf('?')+1):'');
-  if(!params.size && req.query && Object.keys(req.query).length===1 && typeof req.query.__pio_path==='string')params=new URLSearchParams({__pio_path:req.query.__pio_path});
+  if(!params.size && req.query && Object.keys(req.query).length) {
+   if(Object.keys(req.query).every(k=>['__pio_path','path'].includes(k)) && typeof req.query.__pio_path==='string' && (!Object.hasOwn(req.query,'path')||typeof req.query.path==='string'))params=new URLSearchParams(req.query);
+   else req.url='/invalid-pio-route';
+  }
   if(base==='/api/pio-proxy' || params.has('__pio_path')) {
    const route=params.get('__pio_path');
-   const valid=params.size===1 && params.getAll('__pio_path').length===1 && typeof route==='string' && /^[A-Za-z0-9-]+(?:\/[A-Za-z0-9-]+)*$/.test(route);
+   // Vercel can retain the source capture as `path`; accept it only when it
+   // exactly duplicates our explicit route, never as an alternative destination.
+   const valid=[...params.keys()].every(k=>['__pio_path','path'].includes(k)) && params.getAll('__pio_path').length===1 && params.getAll('path').length<=1 && (!params.has('path')||params.get('path')===route) && typeof route==='string' && /^[A-Za-z0-9-]+(?:\/[A-Za-z0-9-]+)*$/.test(route);
    const target=valid?'/api/pio/'+route:null;
    req.url=target && (base==='/api/pio-proxy'||base===target)?target:'/invalid-pio-route';
   }
-  if(process.env.VERCEL_ENV!=='production')console.info('[PIO-ROUTING-DIAGNOSTIC]',JSON.stringify({base:base.startsWith('/api/')?base.slice(0,120):'non-api',parameterNames:[...params.keys()].map(k=>['__pio_path','path'].includes(k)?k:'other'),platformParameterNames:Object.keys(req.query||{}).map(k=>['__pio_path','path'].includes(k)?k:'other'),reservedRouteType:typeof req.query?.__pio_path,reservedRouteIsExpected:req.query?.__pio_path==='session/me',normalizedPath:req.url?.startsWith('/api/')?req.url.split('?')[0].slice(0,120):'rejected'}));
   return proxy(req,res);
  };
 }

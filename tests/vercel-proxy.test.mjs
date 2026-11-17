@@ -37,7 +37,7 @@ async function fixture(t,{relayHandler,timeoutMs,vercelRewrite=false}={}) {
  const {createRoutedProxy}=await import('../api/pio-proxy.js');
  const handler=(vercelRewrite&&createRoutedProxy ? createRoutedProxy : createProxy)({env,request,...timeoutMs&&{timeoutMs}});
  const server=createServer((req,res)=>{
-  if(vercelRewrite)req.url='/api/pio-proxy?__pio_path='+encodeURIComponent(req.url.slice('/api/pio/'.length));
+  if(vercelRewrite){const captured=encodeURIComponent(req.url.slice('/api/pio/'.length));req.url='/api/pio-proxy?__pio_path='+captured+'&path='+captured;}
   return handler(req,res);
  });server.listen(0,'127.0.0.1');await once(server,'listening');
  t.after(async()=>{for(const s of [server,relay,backend]){s.closeAllConnections();await new Promise(r=>s.close(r));}store.close();rmSync(root,{recursive:true,force:true});});
