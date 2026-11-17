@@ -11,7 +11,7 @@ import {randomBytes} from 'node:crypto';
 import {openStore} from '../server/store.mjs';
 import {createBridge} from '../server/http.mjs';
 
-async function fixture(t,{relayHandler,timeoutMs}={}) {
+async function fixture(t,{relayHandler,timeoutMs,vercelRewrite=false}={}) {
  const {createProxy}=await import('../server/vercel-proxy.mjs');
  const root=mkdtempSync(join(tmpdir(),'pio-vercel-fixture-'));
  const key=join(root,'fixture.key'),cert=join(root,'fixture.crt');
@@ -34,7 +34,12 @@ async function fixture(t,{relayHandler,timeoutMs}={}) {
  });
  relay.listen(0,'127.0.0.1');await once(relay,'listening');
  const request=(options,cb)=>tlsRequest({...options,hostname:'127.0.0.1',port:relay.address().port,servername:'localhost',ca:readFileSync(cert)},cb);
- const server=createServer(createProxy({env,request,...timeoutMs&&{timeoutMs}}));server.listen(0,'127.0.0.1');await once(server,'listening');
+ const {createRoutedProxy}=await import('../api/pio-proxy.js');
+ const handler=(vercelRewrite&&createRoutedProxy ? createRoutedProxy : createProxy)({env,request,...timeoutMs&&{timeoutMs}});
+ const server=createServer((req,res)=>{
+  if(vercelRewrite)req.url='/api/pio-proxy?__pio_path='+encodeURIComponent(req.url.slice('/api/pio/'.length));
+  return handler(req,res);
+ });server.listen(0,'127.0.0.1');await once(server,'listening');
  t.after(async()=>{for(const s of [server,relay,backend]){s.closeAllConnections();await new Promise(r=>s.close(r));}store.close();rmSync(root,{recursive:true,force:true});});
  async function call(path='/session/me',{method='GET',body,headers={}}={}) {
   const response=await fetch(`http://127.0.0.1:${server.address().port}/api/pio${path}`,{method,headers:{origin,...body!==undefined&&{'content-type':'application/json'},...headers},body:body===undefined?undefined:JSON.stringify(body),redirect:'manual'});
@@ -42,6 +47,19 @@ async function fixture(t,{relayHandler,timeoutMs}={}) {
  }
  return {call,env,seen,proxyKey,get calls(){return calls;},relay,cert,server};
 }
+
+test('native Vercel rewrite preserves the whitelisted route, cookies and CSRF through verified TLS',async t=>{
+ const f=await fixture(t,{vercelRewrite:true});
+ assert.equal((await f.call()).status,401);
+ const login=await f.call('/session/login',{method:'POST',body:{password:'synthetic-test-password-01'}});
+ assert.equal(login.status,200);
+ const cookie=login.headers.getSetCookie()[0].split(';')[0],csrf=JSON.parse(login.text).csrf;
+ assert.equal(JSON.parse((await f.call('/session/me',{headers:{cookie}})).text).role,'owner');
+ assert.equal((await f.call('/session/logout',{method:'POST',body:{},headers:{cookie,'x-pio-csrf':csrf}})).status,200);
+ const before=f.calls;
+ for(const bad of ['/session/me?target=evil','/%252e%252e/session/me','/session%252fme'])assert.equal((await f.call(bad)).status,404);
+ assert.equal(f.calls,before);
+});
 
 test('actual handler relays verified TLS login, Secure session, Origin and CSRF roundtrip',async t=>{
  const f=await fixture(t);

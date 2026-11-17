@@ -9,7 +9,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    {"source": "/api/pio/:path*", "destination": "/api/pio-proxy"}
+    {"source": "/api/pio/:path*", "destination": "/api/pio-proxy?__pio_path=:path*"}
   ],
   "headers": [
     {
