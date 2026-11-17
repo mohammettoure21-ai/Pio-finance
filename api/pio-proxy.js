@@ -17,6 +17,7 @@ export function createRoutedProxy(options) {
    const target=valid?'/api/pio/'+route:null;
    req.url=target && (base==='/api/pio-proxy'||base===target)?target:'/invalid-pio-route';
   }
+  if(process.env.VERCEL_ENV!=='production')console.info('[PIO-ROUTING-DIAGNOSTIC]',JSON.stringify({base:base.startsWith('/api/')?base.slice(0,120):'non-api',parameterNames:[...params.keys()].map(k=>['__pio_path','path'].includes(k)?k:'other'),platformParameterNames:Object.keys(req.query||{}).map(k=>['__pio_path','path'].includes(k)?k:'other'),reservedRouteType:typeof req.query?.__pio_path,reservedRouteIsExpected:req.query?.__pio_path==='session/me',normalizedPath:req.url?.startsWith('/api/')?req.url.split('?')[0].slice(0,120):'rejected'}));
   return proxy(req,res);
  };
 }
