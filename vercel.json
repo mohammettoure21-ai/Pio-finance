@@ -8,6 +8,9 @@
   },
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "rewrites": [
+    {"source": "/api/pio/:path*", "destination": "/api/pio-proxy"}
+  ],
   "headers": [
     {
       "source": "/(.*)",

@@ -10,7 +10,7 @@ mkdirSync(out,{recursive:true});
 const scratch=resolve(process.env.PIO_TEST_TMPDIR||process.env.TMPDIR||tmpdir());
 mkdirSync(scratch,{recursive:true});
 const env={...process.env,TMPDIR:scratch,TMP:scratch,TEMP:scratch,NO_COLOR:'1'};
-const tests=['portfolio','world','suggestions','azqar','connection','bridge','authorization-race','agents','operator','proposals','concurrency','secure-client','private','cli','mcp','persistence','holding','backup-restore','https-proxy','vercel-proxy'].map(name=>`tests/${name}.test.mjs`);
+const tests=['portfolio','world','suggestions','azqar','connection','bridge','authorization-race','agents','operator','proposals','concurrency','secure-client','private','cli','mcp','persistence','holding','backup-restore','https-proxy','vercel-proxy','vercel-routing'].map(name=>`tests/${name}.test.mjs`);
 const steps=[
  {name:'unit-http-mcp',args:['--test','--test-reporter=tap',...tests],tests:true},
  {name:'secure-browser',args:['--test','--test-reporter=tap','tests/secure-browser.test.mjs'],tests:true},
